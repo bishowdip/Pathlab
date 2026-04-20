@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ instructor.name }} · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-4 py-14">
+  <a href="{% url 'core:instructors' %}" class="text-xs text-ink/60 hover:underline">← All instructors</a>
+  <div class="mt-4 flex items-start gap-6 flex-wrap">
+    {% if instructor.photo %}
+      <img src="{{ instructor.photo.url }}" alt="{{ instructor.name }}" class="w-28 h-28 rounded-full object-cover">
+    {% else %}
+      <div class="w-28 h-28 rounded-full bg-entrance-100 flex items-center justify-center font-bold text-entrance-700 text-3xl">
+        {{ instructor.name|slice:":1" }}
+      </div>
+    {% endif %}
+    <div class="min-w-0 flex-1">
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">{{ instructor.name }}</h1>
+      {% if instructor.headline %}<p class="mt-2 text-ink/70">{{ instructor.headline }}</p>{% endif %}
+      <div class="mt-3 flex gap-3 text-sm">
+        {% if instructor.linkedin_url %}<a href="{{ instructor.linkedin_url }}" class="underline">LinkedIn</a>{% endif %}
+        {% if instructor.website_url %}<a href="{{ instructor.website_url }}" class="underline">Website</a>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  {% if instructor.bio %}
+    <div class="mt-10 prose max-w-none whitespace-pre-line text-ink/85">{{ instructor.bio }}</div>
+  {% endif %}
+
+  <h2 class="mt-12 text-2xl font-extrabold">Courses by {{ instructor.name }}</h2>
+  <div class="mt-5 grid sm:grid-cols-2 gap-5">
+    {% for course in courses %}
+      {% include "_components/course_card.html" with course=course %}
+    {% empty %}
+      <p class="text-ink/50">No courses yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

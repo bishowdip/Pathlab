@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Terms of Service · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-14 prose">
+  <h1 class="text-4xl font-extrabold tracking-tight">Terms of Service</h1>
+  <p class="text-ink/50 text-sm">Last updated: {% now "F j, Y" %}</p>
+
+  <h2>1. Acceptance of terms</h2>
+  <p>By creating an account or purchasing a subscription on {{ site.brand_name|default:"PathLab" }}, you agree to these terms. If you don't agree, don't use the service.</p>
+
+  <h2>2. Accounts</h2>
+  <p>You're responsible for keeping your login credentials safe. You must be at least 13 to create an account. Accounts for children under 13 must be created and managed by a parent or guardian using the Kids' role.</p>
+
+  <h2>3. Subscriptions & payment</h2>
+  <p>Paid plans unlock premium courses, lesson resources, and mock exams. Prices are listed in NPR (and USD where shown). Subscriptions renew automatically unless cancelled before the renewal date.</p>
+
+  <h2>4. Refunds</h2>
+  <p>We offer a 7-day refund on new subscriptions, no questions asked. After 7 days, refunds are considered case-by-case. Reach us via the support chat.</p>
+
+  <h2>5. Content & intellectual property</h2>
+  <p>All course videos, PDFs, and written materials are owned by {{ site.brand_name|default:"PathLab" }} or our instructors. You may not share, resell, or re-upload paid content outside the platform.</p>
+
+  <h2>6. Acceptable use</h2>
+  <p>No cheating on mock exams, no scraping, no automated abuse of the support chatbot. We may suspend accounts that violate these rules.</p>
+
+  <h2>7. Changes</h2>
+  <p>We may update these terms occasionally. Material changes will be announced in-app and via email.</p>
+
+  <h2>8. Contact</h2>
+  <p>Questions about these terms? <a href="{% url 'core:contact' %}">Get in touch</a>.</p>
+</section>
+{% endblock %}

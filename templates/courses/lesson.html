@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}{{ lesson.title }} · {{ course.title }}{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 py-10 grid lg:grid-cols-12 gap-8">
+
+  {# Sidebar: modules + lessons #}
+  <aside class="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
+    <a href="{{ course.get_absolute_url }}" class="text-xs text-ink/60 hover:underline">← {{ course.title }}</a>
+    <div class="mt-2 text-xl font-extrabold leading-tight">
+      {% if is_kid %}🎒 {% endif %}{{ course.title }}
+    </div>
+    {% if enrollment %}
+    <div class="mt-4">
+      <div class="h-2 bg-ink/5 rounded-full overflow-hidden">
+        <div class="h-2
+          {% if course.category.pillar == 'kids' %}bg-kids-500{% elif course.category.pillar == 'tech' %}bg-tech-500{% else %}bg-entrance-500{% endif %}"
+          style="width: {{ enrollment.progress_percent }}%"></div>
+      </div>
+      <div class="mt-1 text-xs text-ink/50">{{ enrollment.progress_percent }}% complete</div>
+    </div>
+    {% endif %}
+
+    <nav class="mt-6 space-y-5 text-sm max-h-[70vh] overflow-auto scroll-no-bar pr-2">
+      {% for m in modules %}
+        <div>
+          <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">{{ m.title }}</div>
+          <ul class="mt-2 space-y-1">
+            {% for l in m.lessons.all %}
+              <li>
+                <a href="{% url 'courses:lesson' course.slug m.id l.slug %}"
+                   class="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white
+                     {% if l.id == lesson.id %}bg-white font-semibold shadow-card{% endif %}">
+                  <span class="w-2 h-2 rounded-full
+                    {% if l.kind == 'video' %}bg-tech-500{% elif l.kind == 'project' %}bg-kids-500{% else %}bg-ink/30{% endif %}"></span>
+                  <span class="flex-1 truncate">{{ l.title }}</span>
+                  <span class="text-xs text-ink/40">{{ l.duration_minutes }}m</span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </nav>
+  </aside>
+
+  <article class="lg:col-span-9">
+    <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">{{ module.title }} · {{ lesson.get_kind_display }}</div>
+    <h1 class="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">
+      {% if is_kid %}{% if lesson.kind == 'video' %}🎬{% elif lesson.kind == 'project' %}🛠️{% else %}📖{% endif %} {% endif %}
+      {{ lesson.title }}
+    </h1>
+
+    {% if lesson.kind == 'video' and lesson.video_url %}
+      <div class="mt-6 aspect-video rounded-3xl overflow-hidden bg-black border border-ink/10">
+        <iframe src="{{ lesson.video_url }}" title="{{ lesson.title }}"
+          class="w-full h-full"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+    {% elif lesson.kind == 'video' and lesson.video_file %}
+      <div class="mt-6 rounded-3xl overflow-hidden bg-black border border-ink/10">
+        <video controls preload="metadata" class="w-full aspect-video"
+               controlsList="nodownload" oncontextmenu="return false;">
+          <source src="{% url 'courses:lesson_video' course.slug module.id lesson.slug %}">
+          Your browser doesn't support HTML5 video.
+        </video>
+      </div>
+    {% elif lesson.kind == 'video' %}
+      <div class="mt-6 aspect-video rounded-3xl bg-ink/5 flex items-center justify-center text-ink/40">
+        No video attached yet.
+      </div>
+    {% endif %}
+
+    {% if lesson.body %}
+      <div class="prose max-w-none mt-8 text-ink/85 whitespace-pre-line">{{ lesson.body }}</div>
+    {% endif %}
+
+    {# Private learner notes #}
+    <div class="mt-8 rounded-3xl bg-white border border-ink/10 p-6">
+      <div class="flex items-center justify-between">
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Your notes</div>
+        <div class="text-xs text-ink/40">Private — only you see these.</div>
+      </div>
+      <form method="post" action="{% url 'courses:save_note' course.slug module.id lesson.slug %}" class="mt-3">
+        {% csrf_token %}
+        <textarea name="body" rows="4" placeholder="Jot down what stood out…"
+          class="w-full rounded-xl border border-ink/15 px-4 py-3 text-sm">{% if note %}{{ note.body }}{% endif %}</textarea>
+        <button class="mt-3 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold hover:bg-ink hover:text-paper">
+          {% if note %}Update note{% else %}Save note{% endif %}
+        </button>
+      </form>
+    </div>
+
+    {% with resources=lesson.resources.all %}
+    {% if resources %}
+      <div class="mt-8 rounded-3xl bg-white border border-ink/10 p-6">
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Resources</div>
+        <ul class="mt-3 divide-y divide-ink/5">
+          {% for r in resources %}
+            <li class="py-3 flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <div class="font-semibold truncate">{{ r.title }}</div>
+                <div class="text-xs text-ink/50">{{ r.get_kind_display }}{% if r.is_free_preview %} · Free preview{% endif %}</div>
+              </div>
+              <a href="{% url 'courses:resource_download' r.id %}"
+                 class="shrink-0 rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold hover:bg-ink hover:text-paper">
+                Download
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {% endwith %}
+
+    <div class="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 pt-6">
+      <div>
+        {% if prev_lesson %}
+        <a href="{% url 'courses:lesson' course.slug prev_lesson.module_id prev_lesson.slug %}"
+          class="rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold">← Previous</a>
+        {% endif %}
+      </div>
+      <form method="post" action="{% url 'courses:lesson_complete' course.slug module.id lesson.slug %}">
+        {% csrf_token %}
+        <button class="rounded-full
+          {% if course.category.pillar == 'kids' %}bg-kids-500 hover:bg-kids-600{% elif course.category.pillar == 'tech' %}bg-tech-500 hover:bg-tech-600{% else %}bg-entrance-600 hover:bg-entrance-700{% endif %}
+          text-white px-6 py-3 font-bold text-base">
+          {% if is_kid %}I did it! 🎉 {% else %}Mark complete & continue{% endif %} →
+        </button>
+      </form>
+    </div>
+  </article>
+
+</section>
+{% endblock %}

@@ -1,0 +1,308 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}{{ site.brand_name|default:"PathLab" }} — Exam Prep · Tech · Kids{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site.tagline }}{% endblock %}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: '#0F1115',
+            paper: '#FAFAF7',
+            entrance: { 50:'#ECFDF5',100:'#D1FAE5',500:'#10B981',600:'#059669',700:'#047857' },
+            tech:     { 50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8' },
+            kids:     { 50:'#FDF4FF',100:'#FAE8FF',500:'#E879F9',600:'#D946EF',700:'#A21CAF' },
+            neon:     { yellow:'#F5FF4B', lime:'#BFFF3C', pink:'#FF5EB8' },
+          },
+          fontFamily: {
+            sans: ['Inter','ui-sans-serif','system-ui','-apple-system','Segoe UI','Roboto','Helvetica Neue','Arial'],
+          },
+          boxShadow: {
+            card: '0 1px 2px rgba(15,17,21,0.04), 0 4px 16px rgba(15,17,21,0.06)',
+            cardHover: '0 8px 24px rgba(15,17,21,0.10)',
+          },
+          borderRadius: { '2xl': '1.25rem', '3xl': '1.75rem' }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .shape-circle   { clip-path: circle(50% at 50% 50%); }
+    .shape-square   { clip-path: inset(0); border-radius: 24px; }
+    .shape-triangle { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+    .shape-hexagon  { clip-path: polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0 50%); }
+    .grain::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .25;
+      background-image: radial-gradient(rgba(0,0,0,.06) 1px, transparent 1px);
+      background-size: 4px 4px;
+    }
+    .scroll-no-bar::-webkit-scrollbar { display:none; }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="bg-paper text-ink antialiased">
+
+  {% if site.promo_active %}
+  <div class="w-full bg-ink text-paper text-sm">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-neon-lime"></span>
+        <span class="truncate">{{ site.promo_text }}</span>
+      </div>
+      <a href="{{ site.promo_cta_url }}" class="underline underline-offset-2 hover:text-neon-lime whitespace-nowrap">
+        {{ site.promo_cta_label }} →
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <header class="sticky top-0 z-40 bg-paper/80 backdrop-blur border-b border-ink/5">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <a href="{% url 'core:home' %}" class="flex items-center gap-2 font-extrabold tracking-tight text-lg">
+        <span class="w-7 h-7 rounded-full bg-entrance-500 inline-block shape-circle"></span>
+        <span class="w-4 h-4 bg-tech-500 -ml-3 shape-square"></span>
+        <span class="w-4 h-4 bg-kids-500 -ml-2 shape-triangle"></span>
+        <span class="ml-2">{{ site.brand_name|default:"PathLab" }}</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-ink/75">
+        <a href="{% url 'courses:list' %}?pillar=entrance" class="hover:text-ink">Entrance Prep</a>
+        <a href="{% url 'courses:list' %}?pillar=tech" class="hover:text-ink">Tech Upskilling</a>
+        <a href="{% url 'courses:list' %}?pillar=kids" class="hover:text-ink">Kids' Camp</a>
+        <a href="{% url 'exams:list' %}" class="hover:text-ink">Mock Exams</a>
+        <a href="{% url 'subscriptions:pricing' %}" class="hover:text-ink">Pricing</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <form action="{% url 'core:search' %}" method="get" class="hidden lg:block">
+          <input name="q" placeholder="Search…" class="rounded-full border border-ink/15 bg-white px-4 py-1.5 text-sm w-40 focus:w-56 transition-all">
+        </form>
+        {% if user.is_authenticated %}
+          {% if user.is_staff %}<a href="{% url 'core:staff_dashboard' %}" class="hidden md:inline text-sm font-medium text-ink/60 hover:text-ink">Staff</a>{% endif %}
+          <a href="{% url 'accounts:dashboard' %}" class="hidden md:inline text-sm font-medium hover:underline">Dashboard</a>
+          <form action="{% url 'accounts:logout' %}" method="post" class="hidden md:inline">{% csrf_token %}
+            <button class="text-sm font-medium text-ink/60 hover:text-ink">Logout</button>
+          </form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="hidden md:inline text-sm font-medium text-ink/70 hover:text-ink">Login</a>
+          <a href="{% url 'accounts:signup' %}" class="hidden md:inline-flex items-center justify-center rounded-full bg-ink text-paper px-4 py-2 text-sm font-semibold hover:bg-ink/90">
+            Try for free
+          </a>
+        {% endif %}
+        <button id="mobile-nav-toggle" class="md:hidden rounded-lg p-2 hover:bg-ink/5" aria-label="Toggle menu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    {# Mobile slide-down menu #}
+    <div id="mobile-nav" class="hidden md:hidden border-t border-ink/10 bg-paper">
+      <div class="max-w-7xl mx-auto px-4 py-4 space-y-2 text-sm font-medium">
+        <form action="{% url 'core:search' %}" method="get" class="mb-3">
+          <input name="q" placeholder="Search…" class="w-full rounded-full border border-ink/15 bg-white px-4 py-2">
+        </form>
+        <a href="{% url 'courses:list' %}?pillar=entrance" class="block py-2 hover:text-entrance-700">Entrance Prep</a>
+        <a href="{% url 'courses:list' %}?pillar=tech" class="block py-2 hover:text-tech-700">Tech Upskilling</a>
+        <a href="{% url 'courses:list' %}?pillar=kids" class="block py-2 hover:text-kids-700">Kids' Camp</a>
+        <a href="{% url 'exams:list' %}" class="block py-2">Mock Exams</a>
+        <a href="{% url 'subscriptions:pricing' %}" class="block py-2">Pricing</a>
+        <div class="border-t border-ink/10 pt-2 mt-2">
+          {% if user.is_authenticated %}
+            <a href="{% url 'accounts:dashboard' %}" class="block py-2 font-semibold">Dashboard</a>
+            <form action="{% url 'accounts:logout' %}" method="post">{% csrf_token %}
+              <button class="py-2 text-ink/60">Logout</button>
+            </form>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="block py-2">Login</a>
+            <a href="{% url 'accounts:signup' %}" class="block py-2 font-semibold">Try for free →</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </header>
+  <script>
+    (function(){
+      const btn = document.getElementById("mobile-nav-toggle");
+      const menu = document.getElementById("mobile-nav");
+      if (btn && menu) btn.addEventListener("click", () => menu.classList.toggle("hidden"));
+    })();
+  </script>
+
+  {% if messages %}
+  <div class="max-w-7xl mx-auto px-4 mt-4 space-y-2">
+    {% for message in messages %}
+      <div class="rounded-xl border border-ink/10 bg-white px-4 py-3 text-sm">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <main>{% block content %}{% endblock %}</main>
+
+  <footer class="mt-24 border-t border-ink/10 bg-white">
+    <div class="max-w-7xl mx-auto px-4 py-14 grid md:grid-cols-4 gap-10">
+      <div>
+        <div class="flex items-center gap-2 font-extrabold text-lg">
+          <span class="w-6 h-6 rounded-full bg-entrance-500"></span>
+          {{ site.brand_name|default:"PathLab" }}
+        </div>
+        <p class="mt-3 text-sm text-ink/60">{{ site.tagline }}</p>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Directions</div>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li><a href="{% url 'courses:list' %}?pillar=entrance" class="hover:underline">Entrance Prep</a></li>
+          <li><a href="{% url 'courses:list' %}?pillar=tech" class="hover:underline">Tech Upskilling</a></li>
+          <li><a href="{% url 'courses:list' %}?pillar=kids" class="hover:underline">Kids' Summer Camp</a></li>
+          <li><a href="{% url 'exams:list' %}" class="hover:underline">Mock Exams</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">About</div>
+        <ul class="mt-3 space-y-2 text-sm">
+          <li><a href="{% url 'core:about' %}" class="hover:underline">Our philosophy</a></li>
+          <li><a href="{% url 'subscriptions:pricing' %}" class="hover:underline">Pricing</a></li>
+          <li><a href="{% url 'core:instructors' %}" class="hover:underline">Instructors</a></li>
+          <li><a href="{% url 'core:contact' %}" class="hover:underline">Contact</a></li>
+          <li><a href="{% url 'core:terms' %}" class="hover:underline">Terms</a></li>
+          <li><a href="{% url 'core:privacy' %}" class="hover:underline">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Stay in the loop</div>
+        <form action="{% url 'accounts:newsletter' %}" method="post" class="mt-3 flex gap-2">
+          {% csrf_token %}
+          <input type="hidden" name="source" value="footer">
+          <input type="email" name="email" placeholder="you@email.com" required
+            class="flex-1 rounded-full border border-ink/15 px-4 py-2 text-sm bg-white">
+          <button class="rounded-full bg-ink text-paper px-4 py-2 text-sm font-semibold">Join</button>
+        </form>
+        <p class="mt-4 text-xs text-ink/50">Partners: eSewa · Khalti · Stripe · PayPal</p>
+      </div>
+    </div>
+    <div class="border-t border-ink/5 py-4 text-center text-xs text-ink/40">
+      © {% now "Y" %} {{ site.brand_name|default:"PathLab" }}. Made in Kathmandu.
+    </div>
+  </footer>
+  {% block body_extra %}{% endblock %}
+
+  {# ---------- Floating support chat widget ---------- #}
+  <div id="chat-fab-wrap" class="fixed bottom-5 right-5 z-50">
+    <button id="chat-fab" aria-label="Open support chat"
+      class="rounded-full bg-ink text-paper w-14 h-14 shadow-cardHover hover:scale-105 transition flex items-center justify-center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M8 10h8M8 14h5m-5 6l-4 1 1-4A8 8 0 1 1 20 12a8 8 0 0 1-12 7z"/>
+      </svg>
+    </button>
+    <div id="chat-panel" class="hidden absolute bottom-16 right-0 w-[22rem] max-w-[92vw] bg-white rounded-3xl border border-ink/10 shadow-cardHover overflow-hidden">
+      <div class="px-4 py-3 border-b border-ink/10 flex items-center justify-between bg-ink text-paper">
+        <div>
+          <div class="text-sm font-bold">PathLab Assistant</div>
+          <div class="text-[10px] opacity-60" id="chat-panel-status">Bot · type "agent" for a human</div>
+        </div>
+        <button id="chat-close" aria-label="Close" class="opacity-70 hover:opacity-100">✕</button>
+      </div>
+      <div id="chat-panel-transcript" class="p-3 space-y-2 h-80 overflow-y-auto bg-paper"
+           data-poll-url="{% url 'support:api_poll' %}"></div>
+      <form id="chat-panel-form" class="flex gap-2 p-3 border-t border-ink/10"
+            data-send-url="{% url 'support:api_send' %}">
+        {% csrf_token %}
+        <input name="body" required autocomplete="off" placeholder="Ask anything…"
+          class="flex-1 rounded-full border border-ink/15 px-3 py-2 text-sm">
+        <button class="rounded-full bg-ink text-paper px-4 text-sm font-semibold">→</button>
+      </form>
+      <a href="{% url 'support:chat' %}" class="block text-center text-xs text-ink/50 py-2 border-t border-ink/5 hover:bg-ink/5">
+        Open full chat →
+      </a>
+    </div>
+  </div>
+  <script>
+  (function() {
+    const fab = document.getElementById("chat-fab");
+    const panel = document.getElementById("chat-panel");
+    const closeBtn = document.getElementById("chat-close");
+    const form = document.getElementById("chat-panel-form");
+    const transcript = document.getElementById("chat-panel-transcript");
+    const statusEl = document.getElementById("chat-panel-status");
+    const csrf = form.querySelector("[name=csrfmiddlewaretoken]").value;
+    let loaded = false;
+
+    function bubbleClass(role) {
+      if (role === "user")  return "ml-auto bg-ink text-paper";
+      if (role === "bot")   return "bg-entrance-50 border border-entrance-200";
+      if (role === "agent") return "bg-tech-50 border border-tech-200";
+      return "mx-auto bg-ink/5 text-ink/60 text-xs";
+    }
+    function label(role) {
+      return {user:"You", bot:"Assistant", agent:"Agent", system:""}[role] || role;
+    }
+    function append(m) {
+      if (transcript.querySelector(`[data-mid="${m.id}"]`)) return;
+      const wrap = document.createElement("div");
+      wrap.dataset.mid = m.id;
+      wrap.className = "max-w-[85%] rounded-2xl px-3 py-2 text-sm " + bubbleClass(m.role);
+      if (label(m.role)) {
+        const tag = document.createElement("div");
+        tag.className = "text-[10px] uppercase tracking-wider opacity-60";
+        tag.textContent = label(m.role);
+        wrap.appendChild(tag);
+      }
+      const body = document.createElement("div");
+      body.textContent = m.body;
+      wrap.appendChild(body);
+      transcript.appendChild(wrap);
+      transcript.scrollTop = transcript.scrollHeight;
+    }
+    async function loadHistory() {
+      if (loaded) return;
+      loaded = true;
+      const res = await fetch(transcript.dataset.pollUrl);
+      const data = await res.json();
+      if (!data.messages.length) {
+        append({id:"welcome", role:"bot", body:"👋 Hi! Ask me about courses, pricing, payments, or exams. Type 'agent' for a human."});
+      } else {
+        data.messages.forEach(append);
+      }
+      statusEl.textContent = data.status.replace("_", " ");
+    }
+
+    fab.addEventListener("click", () => {
+      panel.classList.toggle("hidden");
+      loadHistory();
+    });
+    closeBtn.addEventListener("click", () => panel.classList.add("hidden"));
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = form.querySelector("[name=body]");
+      const body = input.value.trim();
+      if (!body) return;
+      input.value = "";
+      const res = await fetch(form.dataset.sendUrl, {
+        method: "POST",
+        headers: {"Content-Type": "application/json", "X-CSRFToken": csrf},
+        body: JSON.stringify({body}),
+      });
+      const data = await res.json();
+      data.messages.forEach(append);
+      statusEl.textContent = data.status.replace("_", " ");
+    });
+
+    setInterval(async () => {
+      if (panel.classList.contains("hidden")) return;
+      const res = await fetch(transcript.dataset.pollUrl);
+      const data = await res.json();
+      data.messages.forEach(append);
+      statusEl.textContent = data.status.replace("_", " ");
+    }, 8000);
+  })();
+  </script>
+</body>
+</html>

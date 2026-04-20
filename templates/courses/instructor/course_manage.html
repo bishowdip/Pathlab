@@ -1,0 +1,112 @@
+{% extends "courses/instructor/_base.html" %}
+{% block title %}Manage {{ course.title }} · {{ site.brand_name }}{% endblock %}
+{% block teach %}
+<div class="flex items-center gap-3 text-sm text-ink/50">
+  <a href="{% url 'courses:instructor_dashboard' %}" class="hover:underline">&larr; All courses</a>
+</div>
+
+<div class="mt-2 flex items-end justify-between flex-wrap gap-3">
+  <div>
+    <h1 class="text-3xl font-extrabold tracking-tight">{{ course.title }}</h1>
+    <p class="text-sm text-ink/60 mt-1">
+      {{ course.category.name }} ·
+      {% if course.is_free %}Free{% else %}NPR {{ course.price_npr }}{% endif %} ·
+      <span class="{% if course.published %}text-entrance-700{% else %}text-ink/50{% endif %} font-semibold">
+        {% if course.published %}Published{% else %}Draft{% endif %}
+      </span>
+    </p>
+  </div>
+  <div class="flex gap-2 text-sm flex-wrap">
+    <a href="{% url 'courses:instructor_course_edit' slug=course.slug %}"
+       class="rounded-full border border-ink/15 px-4 py-2 font-semibold">Course settings</a>
+    <a href="{% url 'courses:detail' slug=course.slug %}{% if preview_token %}?preview={{ preview_token }}{% endif %}"
+       class="rounded-full border border-ink/15 px-4 py-2 font-semibold">Preview</a>
+    <form method="post" action="{% url 'courses:instructor_course_publish' slug=course.slug %}">
+      {% csrf_token %}
+      <button class="rounded-full bg-ink text-paper px-4 py-2 font-semibold">
+        {% if course.published %}Unpublish{% else %}Publish{% endif %}
+      </button>
+    </form>
+  </div>
+</div>
+
+{% if course.review_status == "pending" %}
+<div class="mt-4 rounded-2xl bg-tech-50 border border-tech-200 px-4 py-3 text-sm">
+  <strong>Awaiting review.</strong> A staff member will approve or request changes shortly.
+  {% if course.submitted_at %}<span class="text-ink/50">Submitted {{ course.submitted_at|date:"M j, H:i" }}.</span>{% endif %}
+</div>
+{% elif course.review_status == "changes_requested" %}
+<div class="mt-4 rounded-2xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm">
+  <strong>Changes requested.</strong>
+  {% if course.review_notes %}<div class="mt-1 text-ink/70 whitespace-pre-line">{{ course.review_notes }}</div>{% endif %}
+  <div class="mt-2 text-xs text-ink/60">Fix the above, then hit Publish again to resubmit.</div>
+</div>
+{% endif %}
+
+{% if preview_token %}
+<div class="mt-4 rounded-2xl bg-yellow-50 border border-yellow-200 px-4 py-3 text-sm">
+  <strong>Draft mode.</strong> Share this preview link with reviewers — it works for 14 days:
+  <input readonly onclick="this.select()"
+         class="mt-2 w-full rounded-xl border border-yellow-300 bg-white px-3 py-2 text-xs font-mono"
+         value="{{ request.scheme }}://{{ request.get_host }}{% url 'courses:detail' slug=course.slug %}?preview={{ preview_token }}">
+</div>
+{% endif %}
+
+<div class="mt-8 flex items-center justify-between">
+  <h2 class="text-lg font-extrabold">Modules &amp; lessons</h2>
+  <a href="{% url 'courses:instructor_module_create' course_slug=course.slug %}"
+     class="rounded-full bg-ink text-paper px-4 py-2 text-sm font-semibold">+ Add module</a>
+</div>
+
+<div class="mt-4 space-y-4">
+  {% for m in modules %}
+    <div class="rounded-3xl bg-white border border-ink/10 p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <div class="text-xs uppercase text-ink/50">Module {{ m.order }}</div>
+          <div class="font-extrabold text-lg">{{ m.title }}</div>
+          {% if m.summary %}<div class="text-sm text-ink/60 mt-1">{{ m.summary }}</div>{% endif %}
+        </div>
+        <div class="flex gap-2 text-xs">
+          <a href="{% url 'courses:instructor_module_edit' course_slug=course.slug module_id=m.id %}"
+             class="rounded-full border border-ink/15 px-3 py-1.5 font-semibold">Edit</a>
+          <form method="post" action="{% url 'courses:instructor_module_delete' course_slug=course.slug module_id=m.id %}"
+                onsubmit="return confirm('Delete this module and all its lessons?');">
+            {% csrf_token %}
+            <button class="rounded-full border border-red-300 text-red-700 px-3 py-1.5 font-semibold hover:bg-red-50">Delete</button>
+          </form>
+        </div>
+      </div>
+
+      <ul class="mt-4 divide-y divide-ink/5">
+        {% for l in m.lessons.all %}
+          <li class="py-3 flex items-center justify-between gap-3 text-sm">
+            <div class="min-w-0">
+              <a href="{% url 'courses:instructor_lesson_edit' course_slug=course.slug module_id=m.id lesson_id=l.id %}"
+                 class="font-semibold hover:underline truncate block">{{ l.order }}. {{ l.title }}</a>
+              <div class="text-xs text-ink/50">
+                {{ l.get_kind_display }} · {{ l.duration_minutes }} min
+                {% if l.is_free_preview %}· <span class="text-entrance-700">free preview</span>{% endif %}
+                {% if l.resources.all %}· {{ l.resources.count }} resource{{ l.resources.count|pluralize }}{% endif %}
+              </div>
+            </div>
+            <div class="flex gap-2 text-xs shrink-0">
+              <a href="{% url 'courses:instructor_lesson_edit' course_slug=course.slug module_id=m.id lesson_id=l.id %}"
+                 class="rounded-full border border-ink/15 px-3 py-1.5 font-semibold">Edit</a>
+            </div>
+          </li>
+        {% empty %}
+          <li class="py-3 text-sm text-ink/50">No lessons yet.</li>
+        {% endfor %}
+      </ul>
+
+      <a href="{% url 'courses:instructor_lesson_create' course_slug=course.slug module_id=m.id %}"
+         class="inline-block mt-3 text-xs font-semibold text-entrance-700 hover:underline">+ Add lesson</a>
+    </div>
+  {% empty %}
+    <div class="rounded-3xl border border-dashed border-ink/20 p-8 text-center text-sm text-ink/60">
+      No modules yet — add the first one to start building your curriculum.
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "courses/instructor/_base.html" %}
+{% block title %}Review queue · {{ site.brand_name }}{% endblock %}
+{% block teach %}
+<h1 class="mt-2 text-3xl font-extrabold tracking-tight">Editorial review</h1>
+<p class="text-sm text-ink/60">Courses awaiting approval before they go live.</p>
+
+<div class="mt-6 space-y-4">
+  {% for c in pending %}
+    <div class="rounded-3xl bg-white border border-ink/10 p-5">
+      <div class="flex items-start justify-between flex-wrap gap-3">
+        <div class="min-w-0">
+          <div class="text-xs text-ink/50">Submitted {{ c.submitted_at|date:"M j, H:i" }} · {{ c.category.name }}</div>
+          <a href="{% url 'courses:instructor_course_manage' slug=c.slug %}"
+             class="font-extrabold text-lg block hover:underline">{{ c.title }}</a>
+          <div class="text-xs text-ink/60 mt-1">by {{ c.instructor.name|default:"—" }}</div>
+        </div>
+        <a href="{% url 'courses:detail' slug=c.slug %}"
+           class="rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold">Open preview</a>
+      </div>
+
+      <div class="mt-4 flex gap-2 flex-wrap">
+        <form method="post" action="{% url 'courses:review_approve' slug=c.slug %}">
+          {% csrf_token %}
+          <button class="rounded-full bg-entrance-600 text-white px-4 py-2 text-sm font-semibold">Approve &amp; publish</button>
+        </form>
+        <form method="post" action="{% url 'courses:review_request_changes' slug=c.slug %}"
+              class="flex gap-2 flex-1 min-w-[20rem]">
+          {% csrf_token %}
+          <input name="notes" placeholder="What needs fixing?"
+                 class="flex-1 rounded-full border border-ink/15 bg-white px-4 py-2 text-sm">
+          <button class="rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold">Request changes</button>
+        </form>
+      </div>
+    </div>
+  {% empty %}
+    <div class="rounded-3xl border border-dashed border-ink/20 p-10 text-center text-sm text-ink/60">
+      Queue is clear. 🎉
+    </div>
+  {% endfor %}
+</div>
+
+<h2 class="mt-10 text-lg font-extrabold">Recently decided</h2>
+<ul class="mt-3 rounded-3xl bg-white border border-ink/10 divide-y divide-ink/5">
+  {% for c in recent %}
+    <li class="px-5 py-3 text-sm flex items-center justify-between">
+      <div>
+        <a href="{% url 'courses:detail' slug=c.slug %}" class="font-semibold hover:underline">{{ c.title }}</a>
+        <span class="text-xs text-ink/50 ml-2">{{ c.instructor.name|default:"—" }}</span>
+      </div>
+      <span class="text-xs font-semibold rounded-full px-3 py-1
+        {% if c.review_status == 'approved' %}bg-entrance-50 text-entrance-700
+        {% else %}bg-yellow-50 text-yellow-700{% endif %}">
+        {{ c.get_review_status_display }}
+      </span>
+    </li>
+  {% empty %}
+    <li class="px-5 py-3 text-sm text-ink/50">Nothing recent.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% comment %}
+  Modular course card (Yandex-style).
+  Required context: course
+  Accent comes from course.category.accent_color: entrance | tech | kids
+{% endcomment %}
+{% with accent=course.category.accent_color|default:"entrance" shape=course.category.shape|default:"circle" %}
+<a href="{{ course.get_absolute_url }}"
+   class="group relative flex flex-col rounded-3xl border border-ink/10 bg-white p-6 shadow-card hover:shadow-cardHover hover:-translate-y-1 transition overflow-hidden">
+  <div class="flex items-start justify-between">
+    <span class="text-xs font-semibold uppercase tracking-wider
+      {% if accent == 'tech' %}text-tech-700{% elif accent == 'kids' %}text-kids-700{% else %}text-entrance-700{% endif %}">
+      {{ course.category.name }}
+    </span>
+    <span class="text-xs text-ink/50">
+      {{ course.get_difficulty_display }} · {{ course.duration_weeks }}w
+    </span>
+  </div>
+
+  <div class="mt-6 h-28 relative">
+    <div class="absolute right-0 top-0 w-24 h-24
+      {% if accent == 'tech' %}bg-tech-100{% elif accent == 'kids' %}bg-kids-100{% else %}bg-entrance-100{% endif %}
+      shape-{{ shape }}"></div>
+    <div class="absolute right-10 top-10 w-12 h-12
+      {% if accent == 'tech' %}bg-tech-500{% elif accent == 'kids' %}bg-kids-500{% else %}bg-entrance-500{% endif %}
+      shape-{% if shape == 'circle' %}square{% else %}circle{% endif %}"></div>
+  </div>
+
+  <h3 class="mt-4 text-xl font-extrabold leading-tight">{{ course.title }}</h3>
+  {% if course.tagline %}
+    <p class="mt-2 text-sm text-ink/60">{{ course.tagline }}</p>
+  {% endif %}
+
+  {% with testimonial=course.testimonials.first %}
+    {% if testimonial %}
+    <div class="mt-5 rounded-2xl bg-ink/5 px-4 py-3">
+      <p class="text-sm text-ink/80 italic">“{{ testimonial.quote }}”</p>
+      <p class="mt-1 text-xs text-ink/50">— {{ testimonial.student_name }}{% if testimonial.student_title %} · {{ testimonial.student_title }}{% endif %}</p>
+    </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="mt-auto pt-6 flex items-center justify-between">
+    <span class="text-sm font-semibold">
+      {% if course.is_free %}Free{% else %}NPR {{ course.price_npr|floatformat:0 }}{% endif %}
+    </span>
+    <span class="text-sm font-medium opacity-60 group-hover:opacity-100 group-hover:translate-x-1 transition">
+      Find out more →
+    </span>
+  </div>
+</a>
+{% endwith %}

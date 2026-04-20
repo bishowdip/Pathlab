@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Search · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-5xl mx-auto px-4 py-10">
+  <form method="get" class="flex gap-2">
+    <input type="search" name="q" value="{{ q }}" autofocus placeholder="Search courses, exams, instructors…"
+      class="flex-1 rounded-full border border-ink/15 px-5 py-3 bg-white">
+    <button class="rounded-full bg-ink text-paper px-6 py-3 font-semibold">Search</button>
+  </form>
+
+  {% if q %}
+    <h1 class="mt-8 text-2xl font-extrabold">Results for "{{ q }}"</h1>
+
+    <h2 class="mt-8 text-lg font-bold">Courses</h2>
+    <ul class="mt-3 grid md:grid-cols-2 gap-3">
+      {% for c in courses %}
+        <li><a href="{{ c.get_absolute_url }}" class="block rounded-2xl bg-white border border-ink/10 p-4 hover:shadow-card">
+          <div class="font-semibold">{{ c.title }}</div>
+          <div class="text-xs text-ink/60">{{ c.category.name }} · {{ c.get_difficulty_display }}</div>
+        </a></li>
+      {% empty %}<li class="text-sm text-ink/50">No courses match.</li>{% endfor %}
+    </ul>
+
+    <h2 class="mt-8 text-lg font-bold">Exams</h2>
+    <ul class="mt-3 grid md:grid-cols-2 gap-3">
+      {% for e in exams %}
+        <li><a href="{% url 'exams:detail' e.id %}" class="block rounded-2xl bg-white border border-ink/10 p-4 hover:shadow-card">
+          <div class="font-semibold">{{ e.name }}</div>
+        </a></li>
+      {% empty %}<li class="text-sm text-ink/50">No exams match.</li>{% endfor %}
+    </ul>
+
+    <h2 class="mt-8 text-lg font-bold">Instructors</h2>
+    <ul class="mt-3 grid md:grid-cols-2 gap-3">
+      {% for i in instructors %}
+        <li><a href="{{ i.get_absolute_url }}" class="block rounded-2xl bg-white border border-ink/10 p-4 hover:shadow-card">
+          <div class="font-semibold">{{ i.name }}</div>
+          <div class="text-xs text-ink/60">{{ i.headline }}</div>
+        </a></li>
+      {% empty %}<li class="text-sm text-ink/50">No instructors match.</li>{% endfor %}
+    </ul>
+  {% else %}
+    <p class="mt-8 text-ink/50">Type anything — we'll search courses, exams, and instructors.</p>
+  {% endif %}
+</section>
+{% endblock %}

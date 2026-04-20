@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard · {{ exam.name }}{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-14">
+  <a href="{% url 'exams:detail' exam.slug %}" class="text-sm text-ink/60 hover:underline">← {{ exam.name }}</a>
+  <h1 class="mt-2 text-4xl font-extrabold tracking-tight">Leaderboard</h1>
+  <p class="mt-2 text-ink/60">
+    {{ stats.attempts|default:0 }} attempts · avg {{ stats.avg|default:0|floatformat:1 }}/{{ exam.total_questions }}
+  </p>
+
+  <ol class="mt-10 divide-y divide-ink/10 rounded-3xl border border-ink/10 bg-white overflow-hidden">
+    {% for row in top %}
+    <li class="flex items-center justify-between px-6 py-4">
+      <div class="flex items-center gap-4">
+        <span class="w-8 h-8 rounded-full grid place-items-center text-sm font-bold
+          {% if forloop.counter == 1 %}bg-neon-yellow text-ink
+          {% elif forloop.counter == 2 %}bg-entrance-100 text-entrance-700
+          {% elif forloop.counter == 3 %}bg-tech-100 text-tech-700
+          {% else %}bg-ink/5 text-ink/70{% endif %}">{{ forloop.counter }}</span>
+        <div>
+          <div class="font-semibold">{{ row.user__username }}</div>
+          <div class="text-xs text-ink/50">{{ row.attempts }} attempt{{ row.attempts|pluralize }}</div>
+        </div>
+      </div>
+      <div class="text-xl font-extrabold tabular-nums">{{ row.best }}<span class="text-ink/40 text-sm">/{{ exam.total_questions }}</span></div>
+    </li>
+    {% empty %}
+    <li class="px-6 py-8 text-center text-ink/50">No submitted attempts yet — be the first!</li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

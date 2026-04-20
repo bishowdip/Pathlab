@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Receipt {{ payment.reference }} · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-2xl mx-auto px-4 py-10">
+  <div class="flex items-center justify-between flex-wrap gap-3 print:hidden">
+    <a href="{% url 'subscriptions:my_subscription' %}" class="text-sm text-ink/60 hover:underline">&larr; Back</a>
+    <button onclick="window.print()"
+            class="rounded-full bg-ink text-paper px-4 py-2 text-sm font-semibold">
+      Print / save PDF
+    </button>
+  </div>
+
+  <div class="mt-6 rounded-3xl border border-ink/10 bg-white p-8">
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="text-2xl font-extrabold tracking-tight">{{ site.brand_name|default:"PathLab" }}</div>
+        <div class="text-xs text-ink/50 mt-1">Receipt</div>
+      </div>
+      <div class="text-right">
+        <div class="text-xs uppercase text-ink/50">Reference</div>
+        <div class="font-mono text-sm">{{ payment.reference }}</div>
+      </div>
+    </div>
+
+    <dl class="mt-8 grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <dt class="text-xs uppercase text-ink/50">Billed to</dt>
+        <dd class="mt-1 font-semibold">{{ payment.subscription.user.get_full_name|default:payment.subscription.user.username }}</dd>
+        <dd class="text-ink/60">{{ payment.subscription.user.email }}</dd>
+      </div>
+      <div class="text-right">
+        <dt class="text-xs uppercase text-ink/50">Date</dt>
+        <dd class="mt-1 font-semibold">{{ payment.created_at|date:"M j, Y H:i" }}</dd>
+        <dt class="text-xs uppercase text-ink/50 mt-3">Gateway</dt>
+        <dd class="mt-1 font-semibold">{{ payment.get_gateway_display }}</dd>
+      </div>
+    </dl>
+
+    <table class="mt-8 w-full text-sm">
+      <thead class="border-b border-ink/10 text-xs uppercase text-ink/60">
+        <tr><th class="text-left py-2">Item</th><th class="text-right py-2">Amount</th></tr>
+      </thead>
+      <tbody>
+        <tr class="border-b border-ink/5">
+          <td class="py-3">
+            <div class="font-semibold">{{ payment.subscription.plan.name }}</div>
+            <div class="text-xs text-ink/60">{{ payment.subscription.plan.get_interval_display }} · {{ payment.subscription.plan.duration_days }} days</div>
+          </td>
+          <td class="py-3 text-right font-semibold">{{ payment.currency }} {{ payment.amount|floatformat:2|intcomma }}</td>
+        </tr>
+        {% if payment.subscription.coupon %}
+          <tr class="text-xs text-entrance-700">
+            <td class="py-2">Coupon {{ payment.subscription.coupon.code }} (-{{ payment.subscription.coupon.percent_off }}%)</td>
+            <td class="py-2 text-right">applied</td>
+          </tr>
+        {% endif %}
+      </tbody>
+      <tfoot>
+        <tr class="border-t-2 border-ink">
+          <td class="pt-3 font-extrabold">Total paid</td>
+          <td class="pt-3 text-right font-extrabold">{{ payment.currency }} {{ payment.amount|floatformat:2|intcomma }}</td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <p class="mt-8 text-xs text-ink/50">
+      Thank you for subscribing. This receipt is your proof of payment — keep it for your records.
+    </p>
+  </div>
+</section>
+{% endblock %}

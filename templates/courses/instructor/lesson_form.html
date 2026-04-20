@@ -1,0 +1,75 @@
+{% extends "courses/instructor/_base.html" %}
+{% block title %}{% if mode == "edit" %}Edit{% else %}New{% endif %} lesson · {{ site.brand_name }}{% endblock %}
+{% block teach %}
+<div class="text-sm text-ink/50">
+  <a href="{% url 'courses:instructor_course_manage' slug=course.slug %}" class="hover:underline">&larr; {{ course.title }}</a>
+  <span class="mx-1">/</span>{{ module.title }}
+</div>
+<h1 class="mt-2 text-2xl font-extrabold tracking-tight">
+  {% if mode == "edit" %}Edit lesson: {{ lesson.title }}{% else %}New lesson{% endif %}
+</h1>
+
+<form method="post" enctype="multipart/form-data"
+      class="mt-6 rounded-3xl bg-white border border-ink/10 p-6 max-w-3xl">
+  {% csrf_token %}
+  {% for field in form %}{% include "courses/instructor/_formfield.html" %}{% endfor %}
+  <div class="mt-6 flex gap-3 flex-wrap">
+    <button class="rounded-full bg-ink text-paper px-5 py-2.5 font-semibold">Save lesson</button>
+    {% if mode == "edit" %}
+      <form method="post" action="{% url 'courses:instructor_lesson_delete' course_slug=course.slug module_id=module.id lesson_id=lesson.id %}"
+            onsubmit="return confirm('Delete this lesson?');" class="inline">
+        {% csrf_token %}
+        <button class="rounded-full border border-red-300 text-red-700 px-5 py-2.5 font-semibold hover:bg-red-50">Delete lesson</button>
+      </form>
+    {% endif %}
+    <a href="{% url 'courses:instructor_course_manage' slug=course.slug %}"
+       class="rounded-full border border-ink/15 px-5 py-2.5 font-semibold">Back</a>
+  </div>
+</form>
+
+{% if mode == "edit" %}
+  <div class="mt-8 rounded-3xl bg-white border border-ink/10 p-6 max-w-3xl">
+    <h2 class="text-lg font-extrabold">Resources</h2>
+    <p class="text-xs text-ink/50">PDFs, slides, source files — downloadable from the lesson page (paid lessons stay gated).</p>
+
+    <ul class="mt-4 divide-y divide-ink/5">
+      {% for r in lesson.resources.all %}
+        <li class="py-3 flex items-center justify-between text-sm gap-3">
+          <div class="min-w-0">
+            <a href="{{ r.file.url }}" class="font-semibold hover:underline truncate block">{{ r.title }}</a>
+            <div class="text-xs text-ink/50">
+              {{ r.get_kind_display }}
+              {% if r.is_free_preview %}· <span class="text-entrance-700">free preview</span>{% endif %}
+            </div>
+          </div>
+          <form method="post" action="{% url 'courses:instructor_resource_delete' course_slug=course.slug module_id=module.id lesson_id=lesson.id resource_id=r.id %}"
+                onsubmit="return confirm('Remove this resource?');">
+            {% csrf_token %}
+            <button class="text-xs rounded-full border border-red-300 text-red-700 px-3 py-1.5 font-semibold hover:bg-red-50">Remove</button>
+          </form>
+        </li>
+      {% empty %}
+        <li class="py-3 text-sm text-ink/50">No resources yet.</li>
+      {% endfor %}
+    </ul>
+
+    <form method="post" enctype="multipart/form-data"
+          action="{% url 'courses:instructor_resource_upload' course_slug=course.slug module_id=module.id lesson_id=lesson.id %}"
+          class="mt-6 border-t border-ink/10 pt-4">
+      {% csrf_token %}
+      <div class="grid md:grid-cols-2 gap-3">
+        {% for field in resource_form %}{% include "courses/instructor/_formfield.html" %}{% endfor %}
+      </div>
+      <button class="mt-4 rounded-full bg-ink text-paper px-5 py-2.5 text-sm font-semibold">+ Upload resource</button>
+    </form>
+  </div>
+{% endif %}
+
+<style>
+  form input[type=text], form input[type=number], form input[type=url],
+  form textarea, form select, form input[type=file] {
+    @apply w-full rounded-2xl border border-ink/15 bg-white px-4 py-2.5 text-sm;
+  }
+  form input[type=checkbox] { @apply w-4 h-4 align-middle; }
+</style>
+{% endblock %}

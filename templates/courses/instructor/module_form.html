@@ -1,0 +1,26 @@
+{% extends "courses/instructor/_base.html" %}
+{% block title %}{% if mode == "edit" %}Edit{% else %}New{% endif %} module · {{ site.brand_name }}{% endblock %}
+{% block teach %}
+<div class="text-sm text-ink/50">
+  <a href="{% url 'courses:instructor_course_manage' slug=course.slug %}" class="hover:underline">&larr; {{ course.title }}</a>
+</div>
+<h1 class="mt-2 text-2xl font-extrabold tracking-tight">
+  {% if mode == "edit" %}Edit module{% else %}New module{% endif %}
+</h1>
+
+<form method="post" class="mt-6 rounded-3xl bg-white border border-ink/10 p-6 max-w-2xl">
+  {% csrf_token %}
+  {% for field in form %}{% include "courses/instructor/_formfield.html" %}{% endfor %}
+  <div class="mt-6 flex gap-3">
+    <button class="rounded-full bg-ink text-paper px-5 py-2.5 font-semibold">Save module</button>
+    <a href="{% url 'courses:instructor_course_manage' slug=course.slug %}"
+       class="rounded-full border border-ink/15 px-5 py-2.5 font-semibold">Cancel</a>
+  </div>
+</form>
+
+<style>
+  form input[type=text], form input[type=number], form textarea {
+    @apply w-full rounded-2xl border border-ink/15 bg-white px-4 py-2.5 text-sm;
+  }
+</style>
+{% endblock %}

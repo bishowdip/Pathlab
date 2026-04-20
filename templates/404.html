@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Page not found · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-xl mx-auto px-4 py-24 text-center">
+  <div class="text-[8rem] font-extrabold leading-none text-entrance-500">404</div>
+  <h1 class="mt-4 text-3xl font-extrabold">We can't find that page.</h1>
+  <p class="mt-2 text-ink/60">The link might be broken, or the page may have moved.</p>
+  <div class="mt-8 flex gap-3 justify-center">
+    <a href="{% url 'core:home' %}" class="rounded-full bg-ink text-paper px-6 py-3 font-semibold">Home</a>
+    <a href="{% url 'courses:list' %}" class="rounded-full border border-ink/15 px-6 py-3 font-semibold">Browse courses</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "courses/instructor/_base.html" %}
+{% block title %}Students · {{ site.brand_name }}{% endblock %}
+{% block teach %}
+<div class="text-sm text-ink/50">
+  <a href="{% url 'courses:instructor_dashboard' %}" class="hover:underline">&larr; Dashboard</a>
+</div>
+<h1 class="mt-2 text-3xl font-extrabold tracking-tight">Students</h1>
+<p class="text-sm text-ink/60">{{ total }} enrollment{{ total|pluralize }} across your courses.</p>
+
+<div class="mt-5 flex gap-2 flex-wrap text-sm">
+  <a href="{% url 'courses:instructor_students' %}"
+     class="rounded-full px-3 py-1.5 font-semibold
+            {% if not active_slug %}bg-ink text-paper{% else %}border border-ink/15{% endif %}">All</a>
+  {% for c in courses %}
+    <a href="?course={{ c.slug }}"
+       class="rounded-full px-3 py-1.5 font-semibold
+              {% if active_slug == c.slug %}bg-ink text-paper{% else %}border border-ink/15{% endif %}">
+      {{ c.title }} <span class="opacity-60">· {{ c.enrolled }}</span>
+    </a>
+  {% endfor %}
+</div>
+
+<div class="mt-6 rounded-3xl bg-white border border-ink/10 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-ink/5 text-xs uppercase text-ink/60">
+      <tr>
+        <th class="text-left px-4 py-3">Student</th>
+        <th class="text-left px-4 py-3">Course</th>
+        <th class="text-left px-4 py-3">Enrolled</th>
+        <th class="text-right px-4 py-3">Progress</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-ink/5">
+      {% for e in enrollments %}
+        <tr>
+          <td class="px-4 py-3">
+            <div class="font-semibold">{{ e.user.get_full_name|default:e.user.username }}</div>
+            <div class="text-xs text-ink/50">{{ e.user.email }}</div>
+          </td>
+          <td class="px-4 py-3">{{ e.course.title }}</td>
+          <td class="px-4 py-3 text-ink/60">{{ e.started_at|date:"M j, Y" }}</td>
+          <td class="px-4 py-3 text-right font-semibold">
+            {{ e.progress_percent }}%
+            {% if e.completed_at %}<span class="block text-[10px] text-entrance-700 uppercase">completed</span>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="px-4 py-6 text-center text-ink/50">No students yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

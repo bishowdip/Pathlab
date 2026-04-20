@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Redirecting to Stripe…{% endblock %}
+{% block content %}
+<section class="max-w-md mx-auto px-4 py-20 text-center">
+  <div class="inline-flex items-center gap-2 bg-tech-50 text-tech-700 rounded-full px-3 py-1 text-xs font-semibold">Stripe sandbox</div>
+  <h1 class="mt-4 text-2xl font-extrabold">Confirm Stripe payment</h1>
+  <p class="mt-2 text-sm text-ink/60">Ref: <b>{{ payment.reference }}</b></p>
+  <div class="mt-6 rounded-3xl bg-white border border-ink/10 p-6">
+    <div class="text-ink/60 text-sm">Amount</div>
+    <div class="text-3xl font-extrabold">NPR {{ payment.amount|floatformat:0 }}</div>
+  </div>
+  <form method="get" action="{% url 'subscriptions:stripe_success' payment.id %}" class="mt-6">
+    <button class="w-full rounded-full bg-tech-600 text-white py-3 font-semibold">Simulate successful payment</button>
+  </form>
+  <p class="mt-8 text-xs text-ink/40">
+    Wire real Stripe: create a Checkout Session server-side and redirect to the URL.
+  </p>
+</section>
+{% endblock %}

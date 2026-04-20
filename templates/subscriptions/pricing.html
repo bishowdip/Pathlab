@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Pricing · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 py-14">
+  <div class="text-center max-w-2xl mx-auto">
+    <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Pricing</div>
+    <h1 class="mt-1 text-4xl md:text-5xl font-extrabold tracking-tight">Simple plans. Cancel anytime.</h1>
+    <p class="mt-3 text-ink/70">Local payment via eSewa/Khalti. International via Stripe.</p>
+  </div>
+
+  <div class="mt-12 grid md:grid-cols-3 gap-5">
+    {% for plan in plans %}
+    <div class="relative rounded-3xl bg-white border {% if plan.is_popular %}border-entrance-500 shadow-cardHover{% else %}border-ink/10{% endif %} p-8 flex flex-col">
+      {% if plan.is_popular %}
+        <span class="absolute -top-3 left-6 bg-entrance-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Most popular</span>
+      {% endif %}
+      <h3 class="text-2xl font-extrabold">{{ plan.name }}</h3>
+      {% if plan.tagline %}<p class="mt-2 text-sm text-ink/60">{{ plan.tagline }}</p>{% endif %}
+      <div class="mt-6">
+        <span class="text-4xl font-extrabold">NPR {{ plan.price_npr|floatformat:0 }}</span>
+        <span class="text-sm text-ink/60">/ {{ plan.get_interval_display|lower }}</span>
+      </div>
+      <ul class="mt-6 space-y-2 text-sm">
+        {% for f in plan.feature_list %}
+          <li class="flex items-start gap-2"><span class="mt-1 w-1.5 h-1.5 rounded-full bg-entrance-500"></span>{{ f }}</li>
+        {% endfor %}
+      </ul>
+      <a href="{% url 'subscriptions:checkout' plan.slug %}"
+         class="mt-8 rounded-full text-center font-semibold py-3
+           {% if plan.is_popular %}bg-ink text-paper{% else %}border border-ink/15{% endif %}">
+        Choose {{ plan.name }}
+      </a>
+    </div>
+    {% empty %}
+      <p class="col-span-full text-ink/50 text-center">No plans yet — create some in admin.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

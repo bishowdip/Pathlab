@@ -1,0 +1,20 @@
+{% if m.role == 'user' %}
+  <div data-mid="{{ m.id }}" class="max-w-[85%] ml-auto rounded-2xl px-4 py-2 text-sm bg-ink text-paper">
+    <div class="text-[10px] uppercase tracking-wider opacity-60">You</div>
+    <div>{{ m.body|linebreaksbr }}</div>
+  </div>
+{% elif m.role == 'bot' %}
+  <div data-mid="{{ m.id }}" class="max-w-[85%] rounded-2xl px-4 py-2 text-sm bg-entrance-50 border border-entrance-200">
+    <div class="text-[10px] uppercase tracking-wider opacity-60">Assistant</div>
+    <div>{{ m.body|linebreaksbr }}</div>
+  </div>
+{% elif m.role == 'agent' %}
+  <div data-mid="{{ m.id }}" class="max-w-[85%] rounded-2xl px-4 py-2 text-sm bg-tech-50 border border-tech-200">
+    <div class="text-[10px] uppercase tracking-wider opacity-60">Agent · {{ m.author.get_username|default:"Team" }}</div>
+    <div>{{ m.body|linebreaksbr }}</div>
+  </div>
+{% else %}
+  <div data-mid="{{ m.id }}" class="mx-auto max-w-[85%] rounded-full px-3 py-1 text-xs bg-ink/5 text-ink/60 text-center">
+    {{ m.body }}
+  </div>
+{% endif %}

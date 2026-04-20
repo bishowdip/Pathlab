@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Support · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-10">
+  <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Support</div>
+  <h1 class="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">We're here to help.</h1>
+  <p class="mt-2 text-ink/70">Ask our assistant anything. Type <b>agent</b> anytime to reach a human.</p>
+
+  <div id="support-transcript"
+       class="mt-8 rounded-3xl bg-white border border-ink/10 p-4 h-[60vh] overflow-y-auto space-y-3"
+       data-poll-url="{% url 'support:api_poll' %}">
+    {% for m in thread.messages.all %}
+      {% include "support/_message.html" with m=m %}
+    {% empty %}
+      <div class="text-sm text-ink/50 text-center py-10">
+        👋 Hi! I'm the PathLab assistant. Ask about courses, pricing, payments, or exams.
+      </div>
+    {% endfor %}
+  </div>
+
+  <form id="support-form" class="mt-4 flex gap-2"
+        data-send-url="{% url 'support:api_send' %}">
+    {% csrf_token %}
+    <input name="body" required autocomplete="off" placeholder="Type your message…"
+      class="flex-1 rounded-full border border-ink/15 px-4 py-3 bg-white text-sm">
+    <button class="rounded-full bg-ink text-paper px-6 py-3 font-semibold text-sm">Send</button>
+  </form>
+  <p class="mt-2 text-xs text-ink/50">Status: <span id="support-status">{{ thread.get_status_display }}</span></p>
+</section>
+
+<script>
+(function() {
+  const form = document.getElementById("support-form");
+  const transcript = document.getElementById("support-transcript");
+  const statusEl = document.getElementById("support-status");
+  const csrf = form.querySelector("[name=csrfmiddlewaretoken]").value;
+
+  function roleClasses(role) {
+    if (role === "user") return "ml-auto bg-ink text-paper";
+    if (role === "bot") return "bg-entrance-50 text-ink border border-entrance-200";
+    if (role === "agent") return "bg-tech-50 text-ink border border-tech-200";
+    return "bg-ink/5 text-ink/60 text-xs mx-auto";
+  }
+  function roleLabel(role) {
+    return {user:"You", bot:"Assistant", agent:"Agent", system:"System"}[role] || role;
+  }
+  function append(m) {
+    const wrap = document.createElement("div");
+    wrap.className = "max-w-[85%] rounded-2xl px-4 py-2 text-sm " + roleClasses(m.role);
+    const tag = document.createElement("div");
+    tag.className = "text-[10px] uppercase tracking-wider opacity-60";
+    tag.textContent = roleLabel(m.role);
+    const body = document.createElement("div");
+    body.textContent = m.body;
+    wrap.appendChild(tag); wrap.appendChild(body);
+    transcript.appendChild(wrap);
+    transcript.scrollTop = transcript.scrollHeight;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const input = form.querySelector("[name=body]");
+    const body = input.value.trim();
+    if (!body) return;
+    input.value = "";
+    const res = await fetch(form.dataset.sendUrl, {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "X-CSRFToken": csrf},
+      body: JSON.stringify({body}),
+    });
+    const data = await res.json();
+    data.messages.forEach(append);
+    if (data.status) statusEl.textContent = data.status.replace("_", " ");
+  });
+
+  // Lightweight poll for human-agent replies.
+  setInterval(async () => {
+    const res = await fetch(transcript.dataset.pollUrl);
+    const data = await res.json();
+    const existing = new Set([...transcript.querySelectorAll("[data-mid]")].map(n => n.dataset.mid));
+    data.messages.forEach(m => {
+      if (!existing.has(String(m.id))) {
+        append(m);
+      }
+    });
+    if (data.status) statusEl.textContent = data.status.replace("_", " ");
+  }, 8000);
+
+  transcript.scrollTop = transcript.scrollHeight;
+})();
+</script>
+{% endblock %}

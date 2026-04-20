@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ exam.name }} · {{ site.brand_name }}{% endblock %}
+
+{% block content %}
+<section class="max-w-4xl mx-auto px-4 py-14">
+  <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">{{ exam.get_exam_type_display }}</div>
+  <h1 class="mt-1 text-4xl md:text-5xl font-extrabold tracking-tight">{{ exam.name }}</h1>
+  {% if exam.description %}
+    <p class="mt-4 text-lg text-ink/70">{{ exam.description }}</p>
+  {% endif %}
+
+  <div class="mt-8 grid sm:grid-cols-3 gap-4">
+    <div class="rounded-2xl border border-ink/10 bg-white p-5"><div class="text-xs text-ink/50 uppercase">Duration</div><div class="mt-1 text-2xl font-extrabold">{{ exam.duration_minutes }} min</div></div>
+    <div class="rounded-2xl border border-ink/10 bg-white p-5"><div class="text-xs text-ink/50 uppercase">Questions</div><div class="mt-1 text-2xl font-extrabold">{{ exam.total_questions }}</div></div>
+    <div class="rounded-2xl border border-ink/10 bg-white p-5"><div class="text-xs text-ink/50 uppercase">Pass mark</div><div class="mt-1 text-2xl font-extrabold">{{ exam.pass_percentage }}%</div></div>
+  </div>
+
+  <div class="mt-8 flex flex-wrap gap-3">
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'exams:start' exam.slug %}">{% csrf_token %}
+        <button class="rounded-full bg-ink text-paper px-6 py-3 font-semibold hover:bg-ink/90">Start attempt →</button>
+      </form>
+    {% else %}
+      <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="rounded-full bg-ink text-paper px-6 py-3 font-semibold">Login to start</a>
+    {% endif %}
+    {% if exam.requires_subscription and not exam.is_free_preview %}
+      <a href="{% url 'subscriptions:pricing' %}" class="rounded-full border border-ink/15 px-6 py-3 font-semibold">See plans</a>
+    {% endif %}
+    <a href="{% url 'exams:leaderboard' exam.slug %}" class="rounded-full border border-ink/15 px-6 py-3 font-semibold">🏆 Leaderboard</a>
+  </div>
+
+  {% if user_attempts %}
+  <div class="mt-12">
+    <h2 class="text-xl font-extrabold">Your recent attempts</h2>
+    <ul class="mt-4 divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-white">
+      {% for a in user_attempts %}
+      <li class="flex items-center justify-between px-5 py-4 text-sm">
+        <span>{{ a.started_at|date:"M j, Y H:i" }}</span>
+        <span class="text-ink/60">{{ a.score }}/{{ a.total }} · {{ a.percentage }}%</span>
+        <a href="{% url 'exams:result' a.id %}" class="font-semibold hover:underline">View →</a>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

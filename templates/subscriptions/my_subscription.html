@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}My subscription · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-4 py-10">
+  <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Account</div>
+  <h1 class="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">My subscription</h1>
+
+  {% if messages %}
+    {% for m in messages %}
+      <div class="mt-4 rounded-2xl px-4 py-3 text-sm
+                  {% if m.tags == 'error' %}bg-red-50 text-red-700
+                  {% else %}bg-entrance-50 text-entrance-700{% endif %}">{{ m }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {# Current plan card #}
+  <div class="mt-6 rounded-3xl border border-ink/10 bg-white p-6">
+    {% if current %}
+      <div class="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <div class="text-xs uppercase text-ink/50">Current plan</div>
+          <div class="text-2xl font-extrabold mt-1">{{ current.plan.name }}</div>
+          <p class="text-sm text-ink/60 mt-1">
+            NPR {{ current.plan.price_npr|floatformat:0|intcomma }} / {{ current.plan.get_interval_display|lower }}
+          </p>
+          {% if current.expires_at %}
+            <p class="text-xs text-ink/50 mt-2">Renews / expires on {{ current.expires_at|date:"M j, Y" }}</p>
+          {% endif %}
+        </div>
+        <form method="post" action="{% url 'subscriptions:cancel_subscription' current.pk %}"
+              onsubmit="return confirm('Cancel your subscription? You keep access until it expires.');">
+          {% csrf_token %}
+          <button class="rounded-full border border-red-300 text-red-700 px-4 py-2 text-sm font-semibold hover:bg-red-50">
+            Cancel subscription
+          </button>
+        </form>
+      </div>
+    {% else %}
+      <div class="text-sm text-ink/60">You don't have an active subscription.</div>
+      <a href="{% url 'subscriptions:pricing' %}"
+         class="inline-block mt-3 rounded-full bg-ink text-paper px-4 py-2 text-sm font-semibold">
+        See plans
+      </a>
+    {% endif %}
+  </div>
+
+  {# History #}
+  <h2 class="mt-10 text-lg font-extrabold">Billing history</h2>
+  <div class="mt-3 rounded-3xl border border-ink/10 bg-white overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-ink/5 text-xs uppercase text-ink/60">
+        <tr>
+          <th class="text-left px-4 py-3">Date</th>
+          <th class="text-left px-4 py-3">Plan</th>
+          <th class="text-left px-4 py-3">Gateway</th>
+          <th class="text-right px-4 py-3">Amount</th>
+          <th class="text-right px-4 py-3">Receipt</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-ink/5">
+        {% for sub in subscriptions %}
+          {% for p in sub.payments.all %}
+            <tr>
+              <td class="px-4 py-3">{{ p.created_at|date:"M j, Y" }}</td>
+              <td class="px-4 py-3">{{ sub.plan.name }}</td>
+              <td class="px-4 py-3">{{ p.get_gateway_display }}</td>
+              <td class="px-4 py-3 text-right font-semibold">
+                {{ p.currency }} {{ p.amount|floatformat:0|intcomma }}
+                <span class="block text-[10px] uppercase
+                  {% if p.status == 'success' %}text-entrance-700
+                  {% elif p.status == 'failed' %}text-red-600
+                  {% else %}text-ink/50{% endif %}">
+                  {{ p.get_status_display }}
+                </span>
+              </td>
+              <td class="px-4 py-3 text-right">
+                {% if p.status == 'success' %}
+                  <a href="{% url 'subscriptions:receipt' p.id %}"
+                     class="text-entrance-700 font-semibold hover:underline">View</a>
+                {% else %}
+                  <span class="text-ink/30">—</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        {% empty %}
+          <tr><td colspan="5" class="px-4 py-6 text-center text-ink/50">No payments yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

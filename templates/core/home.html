@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ site.brand_name }} — Exam prep, tech upskilling & kids' AI camp{% endblock %}
+
+{% block content %}
+
+{# 1. Hero #}
+<section class="relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 pt-16 pb-20 md:pt-24 md:pb-28 grid md:grid-cols-12 gap-8 items-center">
+    <div class="md:col-span-7">
+      <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ink/60 bg-white border border-ink/10 rounded-full px-3 py-1">
+        <span class="w-2 h-2 rounded-full bg-entrance-500"></span> Nepal · Global · Kids
+      </div>
+      <h1 class="mt-6 text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.05]">
+        {{ site.hero_title }}
+      </h1>
+      <p class="mt-5 text-lg text-ink/70 max-w-xl">{{ site.hero_subtitle }}</p>
+      <div class="mt-8 flex flex-wrap items-center gap-3">
+        <a href="{% url 'accounts:signup' %}" class="rounded-full bg-ink text-paper px-6 py-3 font-semibold hover:bg-ink/90">
+          {{ site.hero_cta_label }}
+        </a>
+        <a href="{% url 'exams:list' %}" class="rounded-full border border-ink/20 px-6 py-3 font-semibold hover:bg-white">
+          Take a free mock test
+        </a>
+      </div>
+      <div class="mt-10 flex items-center gap-6 text-sm text-ink/60">
+        <span><b class="text-ink">12,000+</b> learners</span>
+        <span><b class="text-ink">7</b> entrance exams</span>
+        <span><b class="text-ink">4.8★</b> avg rating</span>
+      </div>
+    </div>
+
+    <div class="md:col-span-5 relative">
+      <div class="relative h-[360px] md:h-[460px]">
+        <div class="absolute top-0 right-10 w-48 h-48 bg-entrance-500 shape-circle"></div>
+        <div class="absolute top-24 left-4 w-40 h-40 bg-tech-500 shape-square"></div>
+        <div class="absolute bottom-0 right-0 w-44 h-44 bg-kids-500 shape-triangle"></div>
+        <div class="absolute bottom-16 left-20 w-24 h-24 bg-neon-lime rounded-full border-4 border-ink"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# 2. Special Offer #}
+{% if site.promo_active %}
+<section class="max-w-7xl mx-auto px-4">
+  <div class="rounded-3xl bg-ink text-paper px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-full bg-neon-yellow text-ink flex items-center justify-center font-extrabold">%</div>
+      <div>
+        <div class="text-xs uppercase tracking-widest text-paper/60">Special offer</div>
+        <div class="font-semibold text-lg">{{ site.promo_text }}</div>
+      </div>
+    </div>
+    <a href="{{ site.promo_cta_url }}" class="rounded-full bg-neon-lime text-ink px-5 py-2 font-semibold">
+      {{ site.promo_cta_label }}
+    </a>
+  </div>
+</section>
+{% endif %}
+
+{# 3. Main Catalog #}
+<section class="max-w-7xl mx-auto px-4 mt-20">
+  <div class="flex items-end justify-between flex-wrap gap-4">
+    <div>
+      <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Main catalog</div>
+      <h2 class="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">Choose your pillar.</h2>
+    </div>
+    <div class="flex gap-2 text-sm">
+      <a href="?pillar=all"
+         class="rounded-full px-4 py-2 border {% if pillar == 'all' %}bg-ink text-paper border-ink{% else %}border-ink/15 hover:bg-white{% endif %}">All</a>
+      <a href="?pillar=entrance"
+         class="rounded-full px-4 py-2 border {% if pillar == 'entrance' %}bg-entrance-500 text-white border-entrance-500{% else %}border-ink/15 hover:bg-white{% endif %}">Entrance</a>
+      <a href="?pillar=tech"
+         class="rounded-full px-4 py-2 border {% if pillar == 'tech' %}bg-tech-500 text-white border-tech-500{% else %}border-ink/15 hover:bg-white{% endif %}">Tech</a>
+      <a href="?pillar=kids"
+         class="rounded-full px-4 py-2 border {% if pillar == 'kids' %}bg-kids-500 text-white border-kids-500{% else %}border-ink/15 hover:bg-white{% endif %}">Kids</a>
+    </div>
+  </div>
+
+  <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for course in main_catalog %}
+      {% include "_components/course_card.html" with course=course %}
+    {% empty %}
+      <p class="col-span-full text-ink/50">No courses yet — add some from the admin.</p>
+    {% endfor %}
+  </div>
+
+  {# Entrance exams sub-catalog — CMAT, IELTS, PTE, etc. #}
+  <div class="mt-16">
+    <div class="flex items-end justify-between">
+      <h3 class="text-2xl font-extrabold tracking-tight">Mock exams · timed · instant results</h3>
+      <a href="{% url 'exams:list' %}" class="text-sm font-semibold hover:underline">All exams →</a>
+    </div>
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {% for exam in featured_exams %}
+        {% include "_components/exam_card.html" with exam=exam %}
+      {% empty %}
+        <p class="col-span-full text-ink/50">No exams yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# 4. Special Spotlight — Kids' Summer Camp #}
+<section class="mt-24 relative overflow-hidden bg-gradient-to-br from-kids-50 via-paper to-tech-50">
+  <div class="max-w-7xl mx-auto px-4 py-20 grid md:grid-cols-12 gap-8 items-center">
+    <div class="md:col-span-5">
+      <div class="inline-flex items-center gap-2 bg-kids-500 text-white rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider">
+        <span class="w-2 h-2 rounded-full bg-neon-yellow"></span> Future Innovators
+      </div>
+      <h2 class="mt-5 text-4xl md:text-5xl font-extrabold tracking-tight">
+        Kids' Summer Camp:<br> AI, Scratch, Python.
+      </h2>
+      <p class="mt-4 text-ink/70 max-w-md">
+        Ages 8–16. Project-based learning with a simplified dashboard, progress badges, and a built-in video player.
+      </p>
+      <div class="mt-6 flex gap-3">
+        <a href="{% url 'courses:list' %}?pillar=kids" class="rounded-full bg-kids-500 text-white px-5 py-3 font-semibold hover:bg-kids-600">
+          Explore camp →
+        </a>
+        <a href="{% url 'subscriptions:pricing' %}" class="rounded-full border border-ink/15 px-5 py-3 font-semibold">
+          See pricing
+        </a>
+      </div>
+    </div>
+    <div class="md:col-span-7 grid grid-cols-3 gap-4">
+      {% for course in kids_courses|slice:":3" %}
+        <div class="rounded-3xl bg-white p-5 shadow-card border border-ink/5">
+          <div class="h-20 relative">
+            <div class="absolute right-0 top-0 w-20 h-20 bg-kids-100 shape-{{ course.category.shape|default:'hexagon' }}"></div>
+            <div class="absolute right-6 top-6 w-8 h-8 bg-kids-500 shape-circle"></div>
+          </div>
+          <h4 class="mt-3 font-bold leading-tight">{{ course.title }}</h4>
+          <p class="mt-1 text-xs text-ink/60">{{ course.get_difficulty_display }}</p>
+        </div>
+      {% empty %}
+        <div class="col-span-3 rounded-3xl bg-white p-8 text-center text-ink/50 border border-ink/5">
+          Add a few Kids' Camp courses from the admin.
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{# 5. Success Stories #}
+<section class="max-w-7xl mx-auto px-4 mt-24">
+  <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Success stories</div>
+  <h2 class="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">Real students. Real wins.</h2>
+
+  <div class="mt-10 grid md:grid-cols-4 gap-5">
+    {% for stat in success_stats %}
+      <div class="rounded-3xl border border-ink/10 bg-white p-6">
+        <div class="text-4xl font-extrabold">{{ stat.value }}</div>
+        <div class="mt-2 text-sm text-ink/60">{{ stat.label }}</div>
+      </div>
+    {% empty %}
+      <div class="rounded-3xl border border-ink/10 bg-white p-6"><div class="text-4xl font-extrabold">12k+</div><div class="mt-2 text-sm text-ink/60">Learners onboarded</div></div>
+      <div class="rounded-3xl border border-ink/10 bg-white p-6"><div class="text-4xl font-extrabold">94%</div><div class="mt-2 text-sm text-ink/60">CMAT pass rate</div></div>
+      <div class="rounded-3xl border border-ink/10 bg-white p-6"><div class="text-4xl font-extrabold">7.5</div><div class="mt-2 text-sm text-ink/60">Avg IELTS band</div></div>
+      <div class="rounded-3xl border border-ink/10 bg-white p-6"><div class="text-4xl font-extrabold">250+</div><div class="mt-2 text-sm text-ink/60">Kids shipping AI projects</div></div>
+    {% endfor %}
+  </div>
+
+  {% if video_testimonials %}
+  <div class="mt-10 grid md:grid-cols-3 gap-5">
+    {% for t in video_testimonials|slice:":3" %}
+    <div class="rounded-3xl bg-ink text-paper p-6 relative overflow-hidden">
+      <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-entrance-500 rounded-full opacity-60"></div>
+      <blockquote class="text-lg font-semibold leading-snug relative z-10">“{{ t.quote }}”</blockquote>
+      <div class="mt-6 text-sm text-paper/70 relative z-10">— {{ t.student_name }}{% if t.student_title %} · {{ t.student_title }}{% endif %}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+
+{# 6. Trust Signals #}
+<section class="max-w-7xl mx-auto px-4 mt-24">
+  <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Why this workshop works</div>
+  <h2 class="mt-1 text-3xl md:text-4xl font-extrabold tracking-tight">Philosophy, not just content.</h2>
+  <div class="mt-10 grid md:grid-cols-3 gap-5">
+    {% for t in trust_signals %}
+      <div class="rounded-3xl bg-white border border-ink/10 p-6">
+        <div class="w-12 h-12 bg-entrance-500 shape-{{ t.icon|default:'circle' }}"></div>
+        <h3 class="mt-4 text-lg font-bold">{{ t.title }}</h3>
+        <p class="mt-2 text-sm text-ink/60">{{ t.body }}</p>
+      </div>
+    {% empty %}
+      <div class="rounded-3xl bg-white border border-ink/10 p-6">
+        <div class="w-12 h-12 bg-entrance-500 rounded-full"></div>
+        <h3 class="mt-4 text-lg font-bold">Practice, then explain.</h3>
+        <p class="mt-2 text-sm text-ink/60">Every wrong answer comes with a full explanation — right after you submit.</p>
+      </div>
+      <div class="rounded-3xl bg-white border border-ink/10 p-6">
+        <div class="w-12 h-12 bg-tech-500 shape-square"></div>
+        <h3 class="mt-4 text-lg font-bold">Built mobile-first.</h3>
+        <p class="mt-2 text-sm text-ink/60">Works on a cheap Android. Tested on slow networks.</p>
+      </div>
+      <div class="rounded-3xl bg-white border border-ink/10 p-6">
+        <div class="w-12 h-12 bg-kids-500 shape-triangle"></div>
+        <h3 class="mt-4 text-lg font-bold">Kids don't hate it.</h3>
+        <p class="mt-2 text-sm text-ink/60">Badges, big buttons, and actual projects kids can show a parent.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+{# Final CTA band #}
+<section class="max-w-7xl mx-auto px-4 mt-24 mb-8">
+  <div class="rounded-3xl bg-ink text-paper p-10 md:p-14 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div>
+      <h3 class="text-3xl md:text-4xl font-extrabold tracking-tight max-w-xl">
+        Try the CMAT mock free. See your score in 60 minutes.
+      </h3>
+      <p class="mt-3 text-paper/70 max-w-xl">No credit card. Cancel any plan anytime.</p>
+    </div>
+    <a href="{% url 'exams:list' %}" class="rounded-full bg-neon-lime text-ink px-6 py-3 font-semibold whitespace-nowrap">
+      Start free mock →
+    </a>
+  </div>
+</section>
+
+{% endblock %}

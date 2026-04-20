@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /support/
+Disallow: /courses/resource/
+Disallow: /courses/*/certificate/
+
+Sitemap: /sitemap.xml

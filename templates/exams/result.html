@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Result · {{ attempt.exam.name }}{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-14">
+  <div class="rounded-3xl p-8 border {% if attempt.passed %}border-entrance-500 bg-entrance-50{% else %}border-ink/10 bg-white{% endif %}">
+    <div class="text-xs uppercase tracking-wider text-ink/60 font-semibold">
+      {% if attempt.status == 'expired' %}Time expired{% else %}Submitted{% endif %}
+    </div>
+    <h1 class="mt-1 text-4xl md:text-5xl font-extrabold tracking-tight">
+      {{ attempt.score }} / {{ attempt.total }}
+      <span class="text-ink/50 text-2xl font-bold">({{ attempt.percentage }}%)</span>
+    </h1>
+    <p class="mt-2 text-ink/70">
+      {% if attempt.passed %}You passed — above {{ attempt.exam.pass_percentage }}%.
+      {% else %}Keep at it. Pass mark is {{ attempt.exam.pass_percentage }}%.{% endif %}
+    </p>
+  </div>
+
+  {% if section_breakdown %}
+  <h2 class="mt-10 text-xl font-extrabold tracking-tight">Section-wise breakdown</h2>
+  <div class="mt-4 grid sm:grid-cols-2 gap-3">
+    {% for name, s in section_breakdown.items %}
+    <div class="rounded-2xl bg-white border border-ink/10 p-4">
+      <div class="flex items-center justify-between text-sm">
+        <span class="font-semibold">{{ name }}</span>
+        <span class="text-ink/60">{{ s.correct }}/{{ s.total }} · {{ s.percent }}%</span>
+      </div>
+      <div class="mt-2 h-2 bg-ink/5 rounded-full overflow-hidden">
+        <div class="h-2 {% if s.percent >= 70 %}bg-entrance-500{% elif s.percent >= 40 %}bg-neon-yellow{% else %}bg-red-500{% endif %}"
+             style="width: {{ s.percent }}%"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <h2 class="mt-10 text-2xl font-extrabold tracking-tight">Review with explanations</h2>
+  <div class="mt-5 space-y-5">
+    {% for a in answers %}
+    <div class="rounded-3xl bg-white border border-ink/10 p-6">
+      <div class="flex items-center justify-between">
+        <span class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Q{{ forloop.counter }}{% if a.question.section %} · {{ a.question.section }}{% endif %}</span>
+        <span class="text-xs font-semibold {% if a.is_correct %}text-entrance-700{% else %}text-red-600{% endif %}">
+          {% if a.is_correct %}Correct{% else %}Incorrect{% endif %}
+        </span>
+      </div>
+      <p class="mt-2 font-semibold">{{ a.question.text }}</p>
+      <ul class="mt-3 space-y-2 text-sm">
+        {% for c in a.question.choices.all %}
+          <li class="flex items-center gap-2 rounded-xl px-3 py-2
+            {% if c.is_correct %}bg-entrance-50 text-entrance-700
+            {% elif a.selected_choice_id == c.id %}bg-red-50 text-red-700
+            {% else %}bg-ink/5 text-ink/70{% endif %}">
+            {% if c.is_correct %}✓{% elif a.selected_choice_id == c.id %}✗{% else %}·{% endif %}
+            <span>{{ c.text }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if a.question.explanation %}
+      <div class="mt-4 rounded-2xl bg-ink/5 px-4 py-3 text-sm text-ink/80">
+        <b class="text-ink">Why:</b> {{ a.question.explanation }}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-10 flex gap-3">
+    <a href="{% url 'exams:detail' attempt.exam.slug %}" class="rounded-full border border-ink/15 px-5 py-3 font-semibold">Retry exam</a>
+    <a href="{% url 'exams:leaderboard' attempt.exam.slug %}" class="rounded-full border border-ink/15 px-5 py-3 font-semibold">Leaderboard</a>
+    <a href="{% url 'accounts:dashboard' %}" class="rounded-full bg-ink text-paper px-5 py-3 font-semibold">Back to dashboard</a>
+  </div>
+</section>
+{% endblock %}

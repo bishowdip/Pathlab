@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Courses · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-7xl mx-auto px-4 py-14">
+  <div class="flex items-end justify-between flex-wrap gap-4">
+    <div>
+      <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Courses</div>
+      <h1 class="mt-1 text-4xl md:text-5xl font-extrabold tracking-tight">Pick your next step.</h1>
+    </div>
+    <div class="flex gap-2 text-sm items-center flex-wrap">
+      <form method="get" class="flex gap-2">
+        {% if active_pillar %}<input type="hidden" name="pillar" value="{{ active_pillar }}">{% endif %}
+        <input type="search" name="q" value="{{ q }}" placeholder="Search courses…"
+          class="rounded-full px-4 py-2 border border-ink/15 bg-white w-48 md:w-64">
+        <button class="rounded-full px-4 py-2 bg-ink text-paper font-semibold">Search</button>
+      </form>
+      <a href="?" class="rounded-full px-4 py-2 border {% if not active_pillar %}bg-ink text-paper border-ink{% else %}border-ink/15{% endif %}">All</a>
+      <a href="?pillar=entrance" class="rounded-full px-4 py-2 border {% if active_pillar == 'entrance' %}bg-entrance-500 text-white border-entrance-500{% else %}border-ink/15{% endif %}">Entrance</a>
+      <a href="?pillar=tech" class="rounded-full px-4 py-2 border {% if active_pillar == 'tech' %}bg-tech-500 text-white border-tech-500{% else %}border-ink/15{% endif %}">Tech</a>
+      <a href="?pillar=kids" class="rounded-full px-4 py-2 border {% if active_pillar == 'kids' %}bg-kids-500 text-white border-kids-500{% else %}border-ink/15{% endif %}">Kids</a>
+    </div>
+  </div>
+  <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    {% for course in courses %}
+      {% include "_components/course_card.html" with course=course %}
+    {% empty %}
+      <p class="col-span-full text-ink/50">No courses yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

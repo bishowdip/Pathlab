@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Checkout · {{ plan.name }}{% endblock %}
+{% block content %}
+<section class="max-w-2xl mx-auto px-4 py-14">
+  <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">Checkout</h1>
+  <div class="mt-8 rounded-3xl bg-white border border-ink/10 p-6">
+    <div class="flex justify-between items-start">
+      <div>
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">{{ plan.get_interval_display }}</div>
+        <h2 class="text-xl font-extrabold">{{ plan.name }}</h2>
+      </div>
+      <div class="text-right">
+        {% if coupon %}
+          <div class="text-sm text-ink/40 line-through">NPR {{ plan.price_npr|floatformat:0 }}</div>
+          <div class="text-2xl font-extrabold text-entrance-700">NPR {{ final_price|floatformat:0 }}</div>
+          <div class="text-xs text-entrance-700 font-semibold">{{ coupon.code }} · -{{ coupon.percent_off }}%</div>
+        {% else %}
+          <div class="text-2xl font-extrabold">NPR {{ plan.price_npr|floatformat:0 }}</div>
+          {% if plan.price_usd %}<div class="text-xs text-ink/50">~USD {{ plan.price_usd }}</div>{% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Coupon #}
+  <form method="post" class="mt-4 flex gap-2">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="apply_coupon">
+    <input name="code" value="{% if coupon %}{{ coupon.code }}{% endif %}" placeholder="Promo code"
+      class="flex-1 rounded-full border border-ink/15 px-4 py-2 text-sm bg-white uppercase">
+    <button class="rounded-full border border-ink/15 px-4 py-2 text-sm font-semibold hover:bg-ink hover:text-paper">Apply</button>
+  </form>
+  {% if coupon_error %}<p class="mt-2 text-sm text-red-600">{{ coupon_error }}</p>{% endif %}
+
+  <form method="post" class="mt-6 space-y-3">
+    {% csrf_token %}
+    {% if coupon %}<input type="hidden" name="code" value="{{ coupon.code }}">{% endif %}
+    <p class="text-sm text-ink/60">Choose a payment method:</p>
+    <button name="gateway" value="esewa" class="w-full rounded-2xl border border-ink/10 bg-white px-5 py-4 flex items-center justify-between hover:border-ink">
+      <span class="font-semibold">eSewa <span class="text-xs text-ink/50">(Nepal)</span></span>
+      <span class="text-ink/40">→</span>
+    </button>
+    <button name="gateway" value="khalti" class="w-full rounded-2xl border border-ink/10 bg-white px-5 py-4 flex items-center justify-between hover:border-ink">
+      <span class="font-semibold">Khalti <span class="text-xs text-ink/50">(Nepal)</span></span>
+      <span class="text-ink/40">→</span>
+    </button>
+    <button name="gateway" value="stripe" class="w-full rounded-2xl border border-ink/10 bg-white px-5 py-4 flex items-center justify-between hover:border-ink">
+      <span class="font-semibold">Stripe <span class="text-xs text-ink/50">(International)</span></span>
+      <span class="text-ink/40">→</span>
+    </button>
+    <button name="gateway" value="paypal" class="w-full rounded-2xl border border-ink/10 bg-white px-5 py-4 flex items-center justify-between hover:border-ink">
+      <span class="font-semibold">PayPal <span class="text-xs text-ink/50">(International)</span></span>
+      <span class="text-ink/40">→</span>
+    </button>
+  </form>
+
+  <p class="mt-6 text-xs text-ink/50">
+    These are sandbox/stub integrations for development. Replace with real merchant keys in <code>settings.py → PAYMENT_GATEWAYS</code>.
+  </p>
+</section>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% comment %}Tiny reusable field renderer. Tailwind-styled.{% endcomment %}
+<div class="mt-4">
+  <label class="block text-xs uppercase tracking-wider text-ink/60 font-semibold mb-1">
+    {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+  </label>
+  {{ field }}
+  {% if field.help_text %}<div class="text-xs text-ink/50 mt-1">{{ field.help_text }}</div>{% endif %}
+  {% if field.errors %}<div class="text-xs text-red-600 mt-1">{{ field.errors|join:", " }}</div>{% endif %}
+</div>

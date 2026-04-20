@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Thread #{{ thread.id }}{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-10">
+  <a href="{% url 'support:thread_list' %}" class="text-xs text-ink/60 hover:underline">← Inbox</a>
+  <div class="mt-2 flex items-center justify-between flex-wrap gap-3">
+    <h1 class="text-2xl font-extrabold">
+      {% if thread.user %}{{ thread.user.username }}{% else %}{{ thread.guest_email|default:"Guest" }}{% endif %}
+      <span class="ml-2 text-xs text-ink/50">#{{ thread.id }}</span>
+    </h1>
+    <span class="text-xs font-semibold rounded-full px-3 py-1 bg-ink/5">{{ thread.get_status_display }}</span>
+  </div>
+
+  <div class="mt-6 rounded-3xl bg-white border border-ink/10 p-4 h-[55vh] overflow-y-auto space-y-3">
+    {% for m in thread.messages.all %}
+      {% include "support/_message.html" with m=m %}
+    {% endfor %}
+  </div>
+
+  <form method="post" class="mt-4 flex gap-2">
+    {% csrf_token %}
+    <input name="body" required autocomplete="off" placeholder="Reply as agent…"
+      class="flex-1 rounded-full border border-ink/15 px-4 py-3 bg-white text-sm">
+    <button class="rounded-full bg-ink text-paper px-6 py-3 font-semibold text-sm">Send</button>
+  </form>
+
+  <div class="mt-3 flex gap-2">
+    <form method="post"><input type="hidden" name="action" value="claim">{% csrf_token %}
+      <button class="rounded-full border border-ink/15 px-4 py-2 text-xs font-semibold">Claim thread</button>
+    </form>
+    <form method="post"><input type="hidden" name="action" value="resolve">{% csrf_token %}
+      <button class="rounded-full border border-ink/15 px-4 py-2 text-xs font-semibold">Mark resolved</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

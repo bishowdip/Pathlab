@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Something broke · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-xl mx-auto px-4 py-24 text-center">
+  <div class="text-[8rem] font-extrabold leading-none text-kids-500">500</div>
+  <h1 class="mt-4 text-3xl font-extrabold">Something broke on our end.</h1>
+  <p class="mt-2 text-ink/60">We've been notified. Please try again in a moment.</p>
+  <div class="mt-8">
+    <a href="{% url 'core:home' %}" class="rounded-full bg-ink text-paper px-6 py-3 font-semibold">Back home</a>
+  </div>
+</section>
+{% endblock %}

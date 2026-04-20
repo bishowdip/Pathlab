@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }} · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-4xl mx-auto px-4 py-14">
+  <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">{{ course.category.name }} · {{ course.get_difficulty_display }}</div>
+  <h1 class="mt-1 text-4xl md:text-5xl font-extrabold tracking-tight">{{ course.title }}</h1>
+  {% if course.tagline %}<p class="mt-3 text-lg text-ink/70">{{ course.tagline }}</p>{% endif %}
+
+  {% if course.review_count %}
+  <div class="mt-3 flex items-center gap-2 text-sm">
+    <span class="text-yellow-500">
+      {% for i in "12345" %}{% if forloop.counter <= course.average_rating %}★{% else %}☆{% endif %}{% endfor %}
+    </span>
+    <span class="font-semibold">{{ course.average_rating|floatformat:1 }}</span>
+    <span class="text-ink/60">({{ course.review_count }} review{{ course.review_count|pluralize }})</span>
+  </div>
+  {% endif %}
+
+  {% if course.instructor %}
+  <a href="{{ course.instructor.get_absolute_url }}" class="mt-6 inline-flex items-center gap-3 rounded-2xl bg-white border border-ink/10 px-4 py-3 hover:shadow-card">
+    {% if course.instructor.photo %}
+      <img src="{{ course.instructor.photo.url }}" class="w-10 h-10 rounded-full object-cover">
+    {% else %}
+      <div class="w-10 h-10 rounded-full bg-entrance-100 flex items-center justify-center font-bold text-entrance-700">{{ course.instructor.name|slice:":1" }}</div>
+    {% endif %}
+    <div class="text-sm">
+      <div class="text-xs text-ink/50 uppercase">Instructor</div>
+      <div class="font-semibold">{{ course.instructor.name }}</div>
+    </div>
+  </a>
+  {% endif %}
+
+  <div class="mt-8 grid sm:grid-cols-3 gap-4">
+    <div class="rounded-2xl border border-ink/10 bg-white p-5"><div class="text-xs text-ink/50 uppercase">Duration</div><div class="mt-1 text-2xl font-extrabold">{{ course.duration_weeks }} weeks</div></div>
+    <div class="rounded-2xl border border-ink/10 bg-white p-5"><div class="text-xs text-ink/50 uppercase">Level</div><div class="mt-1 text-2xl font-extrabold">{{ course.get_difficulty_display }}</div></div>
+    <div class="rounded-2xl border border-ink/10 bg-white p-5"><div class="text-xs text-ink/50 uppercase">Price</div><div class="mt-1 text-2xl font-extrabold">{% if course.is_free %}Free{% else %}NPR {{ course.price_npr|floatformat:0 }}{% endif %}</div></div>
+  </div>
+
+  <div class="mt-10 prose max-w-none">
+    <h2 class="text-2xl font-extrabold">About this course</h2>
+    <p class="mt-3 text-ink/80 whitespace-pre-line">{{ course.description }}</p>
+  </div>
+
+  {% if course.testimonials.all %}
+  <div class="mt-12">
+    <h2 class="text-2xl font-extrabold">What students say</h2>
+    <div class="mt-5 grid md:grid-cols-2 gap-5">
+      {% for t in course.testimonials.all %}
+      <div class="rounded-3xl bg-white border border-ink/10 p-6">
+        <p class="text-ink/80">“{{ t.quote }}”</p>
+        <p class="mt-3 text-sm text-ink/50">— {{ t.student_name }}{% if t.student_title %} · {{ t.student_title }}{% endif %}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if course.modules.all %}
+  <div class="mt-12">
+    <h2 class="text-2xl font-extrabold">Curriculum</h2>
+    <div class="mt-5 space-y-4">
+      {% for module in course.modules.all %}
+      <div class="rounded-3xl bg-white border border-ink/10 p-5">
+        <div class="font-bold">{{ module.title }}</div>
+        {% if module.summary %}<div class="text-sm text-ink/60">{{ module.summary }}</div>{% endif %}
+        <ul class="mt-3 space-y-1 text-sm">
+          {% for l in module.lessons.all %}
+          <li class="flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full
+                {% if l.kind == 'video' %}bg-tech-500{% elif l.kind == 'project' %}bg-kids-500{% else %}bg-ink/30{% endif %}"></span>
+              {{ l.title }}
+              {% if l.is_free_preview %}<span class="text-[10px] bg-neon-lime text-ink px-1.5 py-0.5 rounded-full font-semibold">FREE</span>{% endif %}
+            </span>
+            <span class="text-ink/50 text-xs">{{ l.duration_minutes }}m</span>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {# Reviews section #}
+  <div id="reviews" class="mt-14">
+    <h2 class="text-2xl font-extrabold">Student reviews</h2>
+
+    {% if can_review %}
+    <form method="post" action="{% url 'courses:post_review' course.slug %}" class="mt-4 rounded-3xl bg-white border border-ink/10 p-5">
+      {% csrf_token %}
+      <div class="text-xs text-ink/60 uppercase">{% if my_review %}Update your review{% else %}Write a review{% endif %}</div>
+      <div class="mt-2 flex items-center gap-1" id="star-picker">
+        {% for i in "12345" %}
+          <label class="cursor-pointer text-2xl text-yellow-400">
+            <input type="radio" name="rating" value="{{ forloop.counter }}"
+              {% if my_review and my_review.rating == forloop.counter %}checked{% elif not my_review and forloop.counter == 5 %}checked{% endif %}
+              class="sr-only peer">
+            <span class="peer-checked:scale-110 inline-block">★</span>
+          </label>
+        {% endfor %}
+      </div>
+      <textarea name="body" rows="3" placeholder="What stood out?"
+        class="mt-3 w-full rounded-xl border border-ink/15 px-4 py-2 text-sm">{% if my_review %}{{ my_review.body }}{% endif %}</textarea>
+      <button class="mt-3 rounded-full bg-ink text-paper px-5 py-2 text-sm font-semibold">
+        {% if my_review %}Update review{% else %}Post review{% endif %}
+      </button>
+    </form>
+    {% endif %}
+
+    <div class="mt-6 space-y-4">
+      {% for r in reviews %}
+      <div class="rounded-3xl bg-white border border-ink/10 p-5">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold">{{ r.user.username }}</div>
+          <div class="text-yellow-500 text-sm">
+            {% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}
+          </div>
+        </div>
+        {% if r.body %}<p class="mt-2 text-sm text-ink/80 whitespace-pre-line">{{ r.body }}</p>{% endif %}
+        <div class="mt-2 text-xs text-ink/50">{{ r.created_at|date:"M j, Y" }}</div>
+      </div>
+      {% empty %}
+      <p class="text-ink/50 text-sm">No reviews yet. Be the first once you enroll.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="mt-12 flex gap-3">
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'courses:enroll' course.slug %}">{% csrf_token %}
+        <button class="rounded-full bg-ink text-paper px-6 py-3 font-semibold">
+          {% if enrollment %}Continue learning →{% else %}Enroll & start →{% endif %}
+        </button>
+      </form>
+    {% else %}
+      <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="rounded-full bg-ink text-paper px-6 py-3 font-semibold">Login to enroll</a>
+    {% endif %}
+    <a href="{% url 'subscriptions:pricing' %}" class="rounded-full border border-ink/15 px-6 py-3 font-semibold">See plans</a>
+    {% if enrollment and enrollment.progress_percent == 100 %}
+      <a href="{% url 'courses:certificate' course.slug %}" class="rounded-full bg-entrance-600 text-white px-6 py-3 font-semibold">🏆 View certificate</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

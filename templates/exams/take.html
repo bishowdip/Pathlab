@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{{ exam.name }} — in progress{% endblock %}
+
+{% block content %}
+<section class="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-12 gap-6">
+
+  <aside class="lg:col-span-3 order-2 lg:order-1 lg:sticky lg:top-24 lg:self-start">
+    <div class="rounded-3xl bg-white border border-ink/10 p-4">
+      <div class="flex items-center justify-between">
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Time left</div>
+        <div id="timer" class="rounded-full bg-ink text-paper px-3 py-1 font-mono font-semibold tabular-nums text-sm"></div>
+      </div>
+      <div class="mt-5 text-xs uppercase tracking-wider text-ink/50 font-semibold">Questions</div>
+      <div class="mt-3 grid grid-cols-6 gap-1.5">
+        {% for q in questions %}
+          <a href="#q-{{ forloop.counter }}"
+             data-nav="{{ q.id }}"
+             class="qnav aspect-square rounded-lg bg-ink/5 text-xs font-semibold grid place-items-center hover:bg-ink/10">
+            {{ forloop.counter }}
+          </a>
+        {% endfor %}
+      </div>
+      <div class="mt-4 flex items-center gap-3 text-xs text-ink/60">
+        <span class="flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-sm bg-entrance-500"></span>answered</span>
+        <span class="flex items-center gap-1"><span class="inline-block w-2 h-2 rounded-sm bg-neon-yellow border border-ink/20"></span>marked</span>
+      </div>
+      <button type="submit" form="exam-form"
+        class="mt-6 w-full rounded-full bg-entrance-600 text-white py-3 font-semibold hover:bg-entrance-700">
+        Submit exam →
+      </button>
+    </div>
+  </aside>
+
+  <div class="lg:col-span-9 order-1 lg:order-2">
+    <div class="flex items-end justify-between">
+      <div>
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold">{{ exam.get_exam_type_display }}</div>
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">{{ exam.name }}</h1>
+      </div>
+    </div>
+
+    <form id="exam-form" method="post" action="{% url 'exams:submit' attempt.id %}" class="mt-8 space-y-8">
+      {% csrf_token %}
+
+      {% for section, qs in sections.items %}
+        <div class="text-xs uppercase tracking-wider text-ink/50 font-semibold mt-6">{{ section }}</div>
+        {% for q in qs %}
+        <div id="q-{{ forloop.parentloop.counter0|add:forloop.counter }}"
+             data-qid="{{ q.id }}"
+             class="qcard rounded-3xl bg-white border border-ink/10 p-6 scroll-mt-24">
+          <div class="flex items-center justify-between">
+            <span class="text-xs uppercase tracking-wider text-ink/50 font-semibold">Question</span>
+            <label class="text-xs flex items-center gap-1 cursor-pointer">
+              <input type="checkbox" class="mark-review accent-amber-500"> Mark for review
+            </label>
+          </div>
+          <p class="mt-3 text-lg font-semibold leading-snug">{{ q.text }}</p>
+          <div class="mt-4 space-y-2">
+            {% for c in q.choices.all %}
+              <label class="flex items-start gap-3 rounded-2xl border border-ink/10 px-4 py-3 hover:bg-paper cursor-pointer has-[:checked]:border-entrance-500 has-[:checked]:bg-entrance-50">
+                <input type="radio" name="question_{{ q.id }}" value="{{ c.id }}" class="mt-1 accent-entrance-600 choice-input">
+                <span>{{ c.text }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      {% endfor %}
+
+      <div class="flex items-center justify-between">
+        <a href="{% url 'exams:detail' exam.slug %}" class="text-sm text-ink/60 hover:underline">Leave (won't save)</a>
+        <button type="submit" class="rounded-full bg-entrance-600 text-white px-6 py-3 font-semibold hover:bg-entrance-700">Submit exam →</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+(function(){
+  // Timer + auto-submit
+  let remaining = {{ time_remaining }};
+  const el = document.getElementById('timer');
+  const form = document.getElementById('exam-form');
+  function render() {
+    const m = Math.floor(remaining / 60).toString().padStart(2,'0');
+    const s = (remaining % 60).toString().padStart(2,'0');
+    el.textContent = m + ':' + s;
+    if (remaining <= 60) el.classList.add('bg-red-600');
+  }
+  render();
+  const iv = setInterval(() => {
+    remaining -= 1;
+    if (remaining <= 0) { clearInterval(iv); form.submit(); return; }
+    render();
+  }, 1000);
+
+  // Highlight nav pills as answered / marked-for-review
+  const navByQid = {};
+  document.querySelectorAll('.qnav').forEach(a => navByQid[a.dataset.nav] = a);
+
+  function refreshNav(qid) {
+    const card = document.querySelector('.qcard[data-qid="'+qid+'"]');
+    const pill = navByQid[qid];
+    if (!card || !pill) return;
+    const answered = card.querySelector('.choice-input:checked');
+    const marked = card.querySelector('.mark-review:checked');
+    pill.classList.remove('bg-entrance-500','text-white','bg-neon-yellow','text-ink','border','border-ink/20','bg-ink/5');
+    if (answered) { pill.classList.add('bg-entrance-500','text-white'); }
+    else if (marked) { pill.classList.add('bg-neon-yellow','text-ink','border','border-ink/20'); }
+    else { pill.classList.add('bg-ink/5'); }
+  }
+  document.querySelectorAll('.qcard').forEach(card => {
+    const qid = card.dataset.qid;
+    card.addEventListener('change', () => refreshNav(qid));
+  });
+})();
+</script>
+{% endblock %}

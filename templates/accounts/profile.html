@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="max-w-xl mx-auto px-4 py-14">
+  <h1 class="text-3xl font-extrabold tracking-tight">Your profile</h1>
+  <form method="post" enctype="multipart/form-data" class="mt-8 space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <label class="block text-sm">
+        <span class="text-ink/70 font-medium">{{ field.label }}</span>
+        {{ field }}
+        {% if field.errors %}<span class="block mt-1 text-xs text-red-600">{{ field.errors|join:" " }}</span>{% endif %}
+      </label>
+    {% endfor %}
+    <button class="rounded-full bg-ink text-paper px-5 py-3 font-semibold">Save profile</button>
+  </form>
+</section>
+<style>
+  input[type="text"], input[type="file"], select, textarea {
+    width:100%; margin-top:4px; border:1px solid rgba(15,17,21,0.15);
+    border-radius: 12px; padding: 10px 14px; background:#fff;
+  }
+</style>
+{% endblock %}

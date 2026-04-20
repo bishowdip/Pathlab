@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy · {{ site.brand_name }}{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-14 prose">
+  <h1 class="text-4xl font-extrabold tracking-tight">Privacy Policy</h1>
+  <p class="text-ink/50 text-sm">Last updated: {% now "F j, Y" %}</p>
+
+  <h2>What we collect</h2>
+  <ul>
+    <li><b>Account info</b> — username, email, optional full name, optional profile photo.</li>
+    <li><b>Learning data</b> — enrollments, lesson progress, mock-exam attempts & scores, notes you write.</li>
+    <li><b>Payment metadata</b> — plan chosen, gateway used, transaction reference. We never store your card numbers; those stay with Stripe / PayPal / eSewa / Khalti.</li>
+    <li><b>Support chats</b> — messages you send to our bot or human agents, retained to improve answers.</li>
+  </ul>
+
+  <h2>How we use it</h2>
+  <p>To operate the learning platform, track your progress, deliver paid content, and improve the product. We don't sell your data to advertisers. We don't run third-party ad trackers.</p>
+
+  <h2>Kids' accounts (under 13)</h2>
+  <p>Kids' accounts are parent-managed. We collect the minimum needed to deliver lessons and track progress. Parents can request export or deletion of a child's data anytime — contact us.</p>
+
+  <h2>Cookies</h2>
+  <p>We use session cookies for login and a CSRF cookie for security. No advertising cookies.</p>
+
+  <h2>Data export & deletion</h2>
+  <p>You can request a full export of your data, or deletion of your account, via <a href="{% url 'core:contact' %}">the contact form</a>. We honour requests within 30 days.</p>
+
+  <h2>Security</h2>
+  <p>Passwords are hashed with Django's PBKDF2. Media files served through gated views when tied to paid content. We aim for industry-standard protection but can't guarantee 100% against every threat.</p>
+
+  <h2>Contact</h2>
+  <p>Privacy questions? Email hello@pathlab.np or open the support chat.</p>
+</section>
+{% endblock %}

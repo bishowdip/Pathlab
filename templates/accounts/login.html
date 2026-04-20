@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="max-w-md mx-auto px-4 py-20">
+  <h1 class="text-3xl font-extrabold tracking-tight">Welcome back.</h1>
+  <p class="mt-2 text-ink/60 text-sm">Log in to continue your exam prep.</p>
+  <form method="post" class="mt-8 space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+      <label class="block text-sm">
+        <span class="text-ink/70 font-medium">{{ field.label }}</span>
+        <input name="{{ field.name }}" type="{% if field.name == 'password' %}password{% else %}text{% endif %}"
+          class="mt-1 w-full rounded-xl border border-ink/15 bg-white px-4 py-3 focus:border-entrance-500 focus:ring-2 focus:ring-entrance-100 outline-none">
+      </label>
+    {% endfor %}
+    {% if form.errors %}<p class="text-sm text-red-600">Invalid username or password.</p>{% endif %}
+    <button class="w-full rounded-full bg-ink text-paper py-3 font-semibold">Log in</button>
+  </form>
+  <div class="mt-6 flex items-center justify-between text-sm text-ink/60">
+    <a href="{% url 'accounts:signup' %}" class="font-semibold text-ink underline">Sign up</a>
+    <a href="{% url 'accounts:password_reset' %}" class="hover:underline">Forgot password?</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Certificate · {{ course.title }}{% endblock %}
+{% block head_extra %}
+<style>
+  @media print {
+    header, footer, #chat-fab-wrap, .no-print { display: none !important; }
+    body { background: white; }
+    .cert-card { box-shadow: none !important; border: 2px solid #0F1115 !important; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-10">
+  <div class="no-print flex items-center justify-between">
+    <a href="{{ course.get_absolute_url }}" class="text-sm text-ink/60 hover:underline">← {{ course.title }}</a>
+    <div class="flex gap-2">
+      <a href="{% url 'courses:certificate_pdf' slug=course.slug %}"
+         class="rounded-full bg-ink text-paper px-5 py-2 text-sm font-semibold">
+        Download PDF
+      </a>
+      <button onclick="window.print()" class="rounded-full border border-ink/15 px-5 py-2 text-sm font-semibold">
+        Print
+      </button>
+    </div>
+  </div>
+
+  <div class="cert-card mt-6 rounded-3xl bg-white shadow-cardHover p-12 text-center border border-ink/10">
+    <div class="flex justify-center gap-2 mb-6">
+      <span class="w-8 h-8 rounded-full bg-entrance-500 shape-circle"></span>
+      <span class="w-8 h-8 bg-tech-500 shape-square"></span>
+      <span class="w-8 h-8 bg-kids-500 shape-triangle"></span>
+    </div>
+    <div class="text-xs uppercase tracking-[0.3em] text-ink/50 font-semibold">Certificate of Completion</div>
+    <h1 class="mt-6 text-4xl font-extrabold tracking-tight">
+      {{ user.get_full_name|default:user.username }}
+    </h1>
+    <p class="mt-4 text-ink/70">has successfully completed every lesson in</p>
+    <h2 class="mt-3 text-2xl font-extrabold text-entrance-700">{{ course.title }}</h2>
+    <div class="mt-10 grid grid-cols-2 gap-6 text-sm">
+      <div>
+        <div class="text-xs uppercase text-ink/50 font-semibold">Completed on</div>
+        <div class="mt-1 font-bold">{{ enrollment.completed_at|date:"F j, Y"|default:"Today" }}</div>
+      </div>
+      <div>
+        <div class="text-xs uppercase text-ink/50 font-semibold">Issued by</div>
+        <div class="mt-1 font-bold">{{ site.brand_name|default:"PathLab" }}</div>
+      </div>
+    </div>
+    <div class="mt-10 text-[10px] text-ink/40 tracking-wider">
+      Verify: pathlab.np/cert/{{ enrollment.id }}
+    </div>
+  </div>
+</section>
+{% endblock %}

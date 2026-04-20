@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Redirecting to Khalti…{% endblock %}
+{% block content %}
+<section class="max-w-md mx-auto px-4 py-20 text-center">
+  <div class="inline-flex items-center gap-2 bg-kids-50 text-kids-700 rounded-full px-3 py-1 text-xs font-semibold">Khalti sandbox</div>
+  <h1 class="mt-4 text-2xl font-extrabold">Confirm Khalti payment</h1>
+  <p class="mt-2 text-sm text-ink/60">Public key: <b>{{ gateway_config.public_key }}</b> · Ref: <b>{{ payment.reference }}</b></p>
+  <div class="mt-6 rounded-3xl bg-white border border-ink/10 p-6">
+    <div class="text-ink/60 text-sm">Amount</div>
+    <div class="text-3xl font-extrabold">NPR {{ payment.amount|floatformat:0 }}</div>
+  </div>
+  <form method="get" action="{% url 'subscriptions:khalti_verify' payment.id %}" class="mt-6">
+    <button class="w-full rounded-full bg-kids-600 text-white py-3 font-semibold">Simulate successful payment</button>
+  </form>
+  <p class="mt-8 text-xs text-ink/40">
+    Wire real Khalti: initiate via <code>/api/v2/epayment/initiate/</code>, then verify on callback.
+  </p>
+</section>
+{% endblock %}
